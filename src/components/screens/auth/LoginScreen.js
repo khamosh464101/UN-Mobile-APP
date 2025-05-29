@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -19,6 +19,7 @@ import { Input } from "../../common/Input";
 import { Button } from "../../common/Button";
 import { commonStyles } from "../../../styles/commonStyles";
 import { validateEmail, validatePassword } from "../../../utils/validation";
+import { COLORS } from "../../../styles/colors";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -28,6 +29,7 @@ export default function LoginScreen({ navigation }) {
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const passwordRef = useRef(null);
   const handleLogin = () => {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password);
@@ -55,7 +57,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={commonStyles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
       <Header />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -84,6 +86,9 @@ export default function LoginScreen({ navigation }) {
             <Input
               label="Email"
               value={email}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => passwordRef.current.focus()}
               onChangeText={setEmail}
               placeholder="Enter your email"
               keyboardType="email-address"
@@ -91,6 +96,7 @@ export default function LoginScreen({ navigation }) {
             />
 
             <Input
+              ref={passwordRef}
               label="Password"
               value={password}
               onChangeText={setPassword}

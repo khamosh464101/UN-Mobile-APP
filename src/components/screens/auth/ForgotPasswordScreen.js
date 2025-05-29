@@ -11,17 +11,20 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Logo from "../../../assets/images/Logo.png";
 import { Header } from "../../common/Header";
 import { Input } from "../../common/Input";
 import { Button } from "../../common/Button";
 import { commonStyles } from "../../../styles/commonStyles";
 import { validateEmail } from "../../../utils/validation";
+import { COLORS } from "../../../styles/colors";
 
-export default function ForgotPasswordScreen({ navigation }) {
+export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
   const handleSend = () => {
     const emailValidation = validateEmail(email);
@@ -42,7 +45,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   return (
     <SafeAreaView style={commonStyles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
       <Header
         showBackButton={true}
         onBackPress={() => navigation.goBack()}

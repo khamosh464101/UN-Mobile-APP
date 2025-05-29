@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Status",
+    "value": "Active",
+    "icon": "ProfileTickIcon"
+  },
+  {
+    "title": "Position Title",
+    "value": "Test Position",
+    "icon": "ShieldIcon"
+  },
+  {
+    "title": "Official Email",
+    "value": "atiqullah@momtaz.ws",
+    "icon": "EmailIcon"
+  },
+  {
+    "title": "Phone #1",
+    "value": "+93796958229",
+    "icon": "PhoneIcon"
+  },
+  {
+    "title": "Duty Station",
+    "value": "Kabul",
+    "icon": "MapIcon"
+  },
+  {
+    "title": "Date of Joining",
+    "value": "Apr 18, 2025",
+    "icon": "CalendarTickIcon"
+  },
+  {
+    "title": "Created at",
+    "value": "2025-04-20 12:00 AM (1 month ago)",
+    "icon": "CalendarIcon"
+  },
+  {
+    "title": "Updated at",
+    "value": "2025-05-13 12:00 AM (1 week ago)",
+    "icon": "CalendarEditIcon"
+  }
+]

@@ -14,11 +14,12 @@ import {
   Alert,
 } from "react-native";
 import Logo from "../../../assets/images/Logo.png";
-import ArrowLeft from "../../../assets/icons/login/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { Header } from "../../common/Header";
 import { Button } from "../../common/Button";
 import { commonStyles } from "../../../styles/commonStyles";
 import { validateOTP } from "../../../utils/validation";
+import { COLORS } from "../../../styles/colors";
 
 export default function OTPVerificationScreen({ navigation }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -81,7 +82,7 @@ export default function OTPVerificationScreen({ navigation }) {
 
   return (
     <SafeAreaView style={commonStyles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
       <Header
         showBackButton={true}
         onBackPress={() => navigation.goBack()}
@@ -197,6 +198,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: commonStyles.errorText.color,
     textAlign: "left",
+    marginBottom: 12,
   },
   otpErrorText: {
     color: commonStyles.errorText.color,

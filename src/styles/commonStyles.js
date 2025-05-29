@@ -11,6 +11,12 @@ export const commonStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  screenWrapper: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    paddingTop: 36,
+    paddingHorizontal: 18,
+  },
   headerContainer: {
     width: "100%",
     height: 397,
@@ -22,6 +28,15 @@ export const commonStyles = StyleSheet.create({
   headerImage: {
     width: "100%",
     height: "100%",
+  },
+  backButton: {
+    position: "absolute",
+    backgroundColor: "white",
+    padding: 50,
+    top: 10,
+    left: 10,
+    elevation: 10,
+    zIndex: 1,
   },
   keyboardAvoidView: {
     flex: 1,
@@ -35,13 +50,13 @@ export const commonStyles = StyleSheet.create({
     paddingBottom: 30,
   },
   formContainer: {
+    marginTop: HEADER_HEIGHT - 450,
     width: width * 0.9,
     backgroundColor: COLORS.white,
     borderRadius: 10,
     padding: 22,
     paddingTop: 44,
     paddingBottom: 44,
-    marginTop: 0,
     alignItems: "left",
   },
   welcomeText: {

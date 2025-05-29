@@ -15,11 +15,11 @@ export const Header = ({
         style={commonStyles.headerImage}
         resizeMode="cover"
       />
-      {showBackButton && (
+      {/* {showBackButton && (
         <TouchableOpacity style={commonStyles.backButton} onPress={onBackPress}>
           {backIcon}
         </TouchableOpacity>
-      )}
+      )} */}
     </View>
   );
 };
