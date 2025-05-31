@@ -5,7 +5,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "../components/screens/dashboard/HomeScreen/HomeScreen";
 import ProfileScreen from "../components/screens/dashboard/ProfileScreen/ProfileScreen";
 import SearchScreen from "../components/screens/dashboard/SettingsScreen";
-import TasksScreen from "../components/screens/dashboard/TasksScreen";
+import TasksScreen from "../components/screens/dashboard/TasksScreen/TasksScreen";
+import TaskStackNavigator from "./TaskStackNavigator";
 
 // Import icons
 import HomeActiveIcon from "../assets/icons/home-active.svg";
@@ -56,8 +57,9 @@ export default function DashboardNavigator() {
       />
       <Tab.Screen
         name="Tasks"
-        component={TasksScreen}
+        component={TaskStackNavigator}
         options={{
+          headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? <TaskActiveIcon /> : <TaskIcon />,
           tabBarActiveTintColor: COLORS.primary,

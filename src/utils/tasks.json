@@ -1,0 +1,51 @@
+[
+  {
+    "id": "TSTIT-2-5",
+    "title": "Testing second ticket",
+    "status": "Closed",
+    "dueDate": "2025-04-23",
+    "assignedBy": {
+      "name": "Atiqullah Sadeqi",
+      "avatar": "path/to/avatar.png"
+    },
+    "estimationHours": "21.00",
+    "deadline": "2025-05-14",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    "comments": [
+      {
+        "id": 1,
+        "author": "Atiqullah Sadeqi",
+        "message": "Lorem Ipsum is simply dummy text of the printing...",
+        "timestamp": "2025-04-14 13:48"
+      }
+    ]
+  },
+  {
+    "id": "TSTIT-2-6",
+    "title": "Frontend API Integration",
+    "status": "Open",
+    "dueDate": "2025-04-25",
+    "assignedBy": {
+      "name": "Atiqullah Sadeqi",
+      "avatar": "path/to/avatar.png"
+    },
+    "estimationHours": 10,
+    "deadline": "2025-05-20",
+    "description": "Integrate all API endpoints with frontend.",
+    "comments": []
+  },
+  {
+    "id": "TSTIT-2-7",
+    "title": "Fix Login Bug",
+    "status": "In Progress",
+    "dueDate": "2025-04-24",
+    "assignedBy": {
+      "name": "Atiqullah Sadeqi",
+      "avatar": "path/to/avatar.png"
+    },
+    "estimationHours": 8,
+    "deadline": "2025-05-18",
+    "description": "Users are being redirected incorrectly on login.",
+    "comments": []
+  }
+]

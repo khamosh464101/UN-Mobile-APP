@@ -5,8 +5,9 @@ import { commonStyles } from "../../../../styles/commonStyles";
 import TabSwitcher from "../../../common/TabSwitcher";
 
 import personalInfo from "../../../../utils/personalinfo.json";
-// import ProfileInfoItem fro./components/PersonalInfotem";
+import officialInfo from "../../../../utils/officialinfo.json";
 import PersonalInfo from "./components/PersonalInfo";
+import OfficialInfo from "./components/OfficialInfo";
 
 export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState("personal");
@@ -42,9 +43,26 @@ export default function ProfileScreen() {
           })}
         </ScrollView>
       ) : (
-        <View>
-          <Text>Official Info</Text>
-        </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollView}
+          keyboardShouldPersistTaps="handled"
+        >
+          {officialInfo?.map((item, index) => {
+            return (
+              <OfficialInfo
+                key={index}
+                status={item.status}
+                position={item.position}
+                email={item.email}
+                phone={item.phone}
+                duty={item.duty}
+                joined={item.joined}
+                created={item.created}
+                updated={item.updated}
+              />
+            );
+          })}
+        </ScrollView>
       )}
     </View>
   );
