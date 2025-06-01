@@ -1,6 +1,12 @@
 import React from "react";
-import { Text, TouchableOpacity, StyleSheet, FlatList } from "react-native";
-
+import {
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  ScrollView,
+} from "react-native";
+import { COLORS } from "../../../../../styles/colors";
 const filters = ["All", "Open", "In Progress", "Closed"];
 
 const TaskFilter = ({ activeFilter, onFilterChange, tasks }) => {
@@ -11,56 +17,55 @@ const TaskFilter = ({ activeFilter, onFilterChange, tasks }) => {
           (task) => task.status.toLowerCase() === status.toLowerCase()
         ).length;
   return (
-    <FlatList
-      data={filters}
+    <ScrollView
       horizontal
-      keyExtractor={(item) => item}
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.filterContainer}
-      renderItem={({ item }) => {
+      contentContainerStyle={styles.container}
+    >
+      {filters.map((item) => {
         const isActive = activeFilter === item;
         return (
           <TouchableOpacity
-            style={[styles.filterButton, isActive && styles.activeButton]}
+            key={item}
+            style={[styles.button, isActive && styles.activeButton]}
             onPress={() => onFilterChange(item)}
           >
-            <Text style={[styles.filterText, isActive && styles.activeText]}>
+            <Text style={[styles.text, isActive && styles.activeText]}>
               {item} ({countByStatus(item)})
             </Text>
           </TouchableOpacity>
         );
-      }}
-    />
+      })}
+    </ScrollView>
   );
 };
 
 export default TaskFilter;
 
 const styles = StyleSheet.create({
-  filterContainer: {
-    flex: 1,
-    gap: 8,
-    marginVertical: 23,
-    paddingHorizontal: 0,
+  container: {
+    paddingVertical: 20,
+    marginBottom: 10,
+    flexDirection: "row",
   },
-  filterButton: {
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-    marginRight: 8,
+  button: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    marginRight: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.lightGray,
+    height: 35,
     alignItems: "center",
     justifyContent: "center",
-    height: 40,
   },
   activeButton: {
-    backgroundColor: "#7e22ce",
+    backgroundColor: COLORS.primary,
   },
-  filterText: {
+  text: {
     fontSize: 14,
-    color: "#333",
+    color: COLORS.subtitle,
   },
   activeText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: COLORS.white,
   },
 });

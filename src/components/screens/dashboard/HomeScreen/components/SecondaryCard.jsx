@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, ImageBackground } from "react-native";
-import TasksIcon from "../../../../../assets/icons/task.svg";
+import TasksIcon from "../../../../../assets/icons/task-white.svg";
 import { COLORS } from "../../../../../styles/colors";
 
 const TaskIcon = () => <TasksIcon width={35} height={35} />;

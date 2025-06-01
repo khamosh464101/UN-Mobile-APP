@@ -1,7 +1,7 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import TasksScreen from "../components/screens/dashboard/TasksScreen/TasksScreen";
-import TaskDetails from "../components/screens/dashboard/TasksScreen/TaskDetails"; // The details screen
+import TaskScreen from "../components/screens/dashboard/TasksScreen/TaskScreen"; // The details screen
 
 const Stack = createStackNavigator();
 
@@ -15,7 +15,7 @@ const TaskStackNavigator = () => {
       />
       <Stack.Screen
         name="TaskDetails"
-        component={TaskDetails}
+        component={TaskScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

@@ -5,10 +5,20 @@ import Topbar from "../../../common/Topbar";
 import TaskFilter from "./components/TaskFilter";
 import tasksData from "../../../../utils/tasks.json";
 import TaskCard from "./components/TaskCard";
+import { Dimensions } from "react-native";
+
+const filters = ["All", "Open", "In Progress", "Closed"];
+const screenHeight = Dimensions.get("window").height;
+
 const TasksScreen = ({ navigation }) => {
   const handleViewDetails = (task) => {
     navigation.navigate("TaskDetails", { task });
   };
+
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+  };
+
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filteredTasks =
@@ -23,11 +33,14 @@ const TasksScreen = ({ navigation }) => {
       <Topbar />
       <TaskFilter
         activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
+        onFilterChange={handleFilterChange}
         tasks={tasksData}
+        filter={filters}
+        style={{ paddingVertical: 10 }}
       />
+
       <ScrollView contentContainerStyle={styles.container}>
-        {tasksData.map((task, index) => (
+        {filteredTasks.map((task, index) => (
           <TaskCard
             key={index}
             task={task}
@@ -41,4 +54,10 @@ const TasksScreen = ({ navigation }) => {
 
 export default TasksScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 15,
+    justifyContent: "flex-start",
+    minHeight: screenHeight * 0.65,
+  },
+});
