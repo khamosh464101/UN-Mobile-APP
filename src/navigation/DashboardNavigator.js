@@ -4,8 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 // Import dashboard screens
 import HomeScreen from "../components/screens/dashboard/HomeScreen/HomeScreen";
 import ProfileScreen from "../components/screens/dashboard/ProfileScreen/ProfileScreen";
-import SearchScreen from "../components/screens/dashboard/SettingsScreen";
-import TasksScreen from "../components/screens/dashboard/TasksScreen/TasksScreen";
+import SearchScreen from "../components/screens/dashboard/SearchScreen/SearchScreen";
 import TaskStackNavigator from "./TaskStackNavigator";
 
 // Import icons
@@ -37,12 +36,12 @@ export default function DashboardNavigator() {
         }}
       />
       <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="Tasks"
+        component={TaskStackNavigator}
         options={{
           headerShown: false,
           tabBarIcon: ({ focused }) =>
-            focused ? <ProfileActiveIcon /> : <ProfileIcon />,
+            focused ? <TaskActiveIcon /> : <TaskIcon />,
           tabBarActiveTintColor: COLORS.primary,
         }}
       />
@@ -50,18 +49,19 @@ export default function DashboardNavigator() {
         name="Search"
         component={SearchScreen}
         options={{
+          headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? <SearchActiveIcon /> : <SearchIcon />,
           tabBarActiveTintColor: COLORS.primary,
         }}
       />
       <Tab.Screen
-        name="Tasks"
-        component={TaskStackNavigator}
+        name="Profile"
+        component={ProfileScreen}
         options={{
           headerShown: false,
           tabBarIcon: ({ focused }) =>
-            focused ? <TaskActiveIcon /> : <TaskIcon />,
+            focused ? <ProfileActiveIcon /> : <ProfileIcon />,
           tabBarActiveTintColor: COLORS.primary,
         }}
       />

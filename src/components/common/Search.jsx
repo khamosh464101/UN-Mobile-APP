@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -9,11 +9,26 @@ import {
 
 import SearchIconTransparent from "../../assets/icons/search.svg";
 import SearchSubmitIcon from "../../assets/icons/search-submit.svg";
+import { COLORS } from "../../styles/colors";
 
 const RefreshIcon = () => <SearchSubmitIcon width={25} height={25} />;
 const SearchIcon = () => <SearchIconTransparent width={25} height={25} />;
 
-const Search = () => {
+const Search = ({ onSearch, value, onChangeText, placeholder }) => {
+  const [query, setQuery] = useState("");
+
+  const isControlled =
+    typeof value === "string" && typeof onChangeText === "function";
+
+  const inputValue = isControlled ? value : query;
+  const setInputValue = isControlled ? onChangeText : setQuery;
+
+  const handleSubmit = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed) {
+      onSearch?.(trimmed);
+    }
+  };
   return (
     <View>
       <Text style={styles.searchTitle}>
@@ -22,9 +37,18 @@ const Search = () => {
       </Text>
       <View style={styles.searchBarRow}>
         <View style={styles.searchBar}>
-          <SearchIcon />
-          <TextInput style={styles.searchInput} placeholder="" />
-          <TouchableOpacity style={styles.refreshBtn}>
+          <View style={styles.searchIcon}>
+            <SearchIcon />
+          </View>
+          <TextInput
+            style={styles.searchInput}
+            value={inputValue}
+            onChangeText={setInputValue}
+            onSubmitEditing={handleSubmit}
+            placeholder={placeholder || "Search by ID or title"}
+            returnKeyType="search"
+          />
+          <TouchableOpacity style={styles.refreshBtn} onPress={handleSubmit}>
             <RefreshIcon />
           </TouchableOpacity>
         </View>
@@ -39,12 +63,11 @@ const styles = StyleSheet.create({
   searchTitle: {
     fontSize: 30,
     fontWeight: "900",
-    color: "#111",
     marginBottom: 15,
     marginTop: 15,
   },
   searchEntry: {
-    color: "#895ADF",
+    color: COLORS.primary,
     fontWeight: "bold",
   },
   searchBarRow: {
@@ -56,12 +79,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: COLORS.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 12,
-    height: 44,
   },
   searchInput: {
     flex: 1,
@@ -70,7 +91,6 @@ const styles = StyleSheet.create({
   },
   refreshBtn: {
     marginLeft: 10,
-    backgroundColor: "#fff",
     width: 30,
     height: 42,
     justifyContent: "center",

@@ -62,7 +62,10 @@ export default function OTPVerificationScreen({ navigation }) {
         if (otpString !== "770415") {
           setOtpError("Invalid code. Please try again.");
         } else {
-          navigation.navigate("Dashboard");
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Dashboard" }],
+          });
         }
       }, 2000);
     }

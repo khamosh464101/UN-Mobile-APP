@@ -23,12 +23,12 @@ const TaskScreen = () => {
     <View style={commonStyles.screenWrapper}>
       <Topbar />
       <TouchableOpacity
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation.navigate("Tasks")}
         style={{ flexDirection: "row", alignItems: "center" }}
       >
         <LeftArrow />
         <Text style={{ marginLeft: 0, fontSize: 16, fontWeight: "500" }}>
-          Tasks
+          All Tasks
         </Text>
       </TouchableOpacity>
       <TabSwitcher

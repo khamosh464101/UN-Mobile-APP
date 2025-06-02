@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, FlatList, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { commonStyles } from "../../../../styles/commonStyles";
 import Topbar from "../../../common/Topbar";
 import TaskFilter from "./components/TaskFilter";

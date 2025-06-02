@@ -75,9 +75,9 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   value: {
-    fontSize: 15,
     color: "#000",
-    fontWeight: "500",
     marginTop: 2,
+    lineHeight: 20,
+    textAlign: "justify",
   },
 });
