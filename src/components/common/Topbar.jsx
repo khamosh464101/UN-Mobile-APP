@@ -1,10 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import BellIconEmpty from "../../assets/icons/bell-icon-empty.svg";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import notificationsData from "../../utils/notificationsData.json";
+import { useNavigation } from "@react-navigation/native";
+import NotificationEmpty from "../../assets/icons/notification-empty.svg";
+import NotificationFull from "../../assets/icons/notification-full.svg";
 import { COLORS } from "../../styles/colors";
 const BellIcon = () => <BellIconEmpty width={30} height={30} />;
 
 const Topbar = () => {
+  const navigation = useNavigation();
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    const checkUnreadNotifications = async () => {
+      try {
+        const stored = await AsyncStorage.getItem("readNotifications");
+        const read = stored ? JSON.parse(stored) : [];
+
+        const unread = notificationsData.some((n) => !read.includes(n.id));
+
+        setHasUnread(unread);
+      } catch (e) {
+        console.error("Error checking unread notifications", e);
+      }
+    };
+
+    const unsubscribe = navigation.addListener("focus", () => {
+      checkUnreadNotifications(); // refresh on screen focus
+    });
+
+    // initial check
+    checkUnreadNotifications();
+
+    return unsubscribe;
+  }, [navigation]);
   return (
     <View style={styles.topBar}>
       <View style={styles.avatar} />
@@ -13,8 +43,11 @@ const Topbar = () => {
         <Text style={styles.userSubtitle}>Sadeqi</Text>
       </View>
       <View style={{ flex: 1 }} />
-      <TouchableOpacity style={styles.bellBtn}>
-        <BellIcon />
+      <TouchableOpacity
+        style={styles.bellBtn}
+        onPress={() => navigation.navigate("Notifications")}
+      >
+        {hasUnread ? <NotificationFull /> : <NotificationEmpty />}
       </TouchableOpacity>
     </View>
   );

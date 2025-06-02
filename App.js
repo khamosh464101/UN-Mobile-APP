@@ -12,6 +12,7 @@ import ForgotPasswordScreen from "./src/components/screens/auth/ForgotPasswordSc
 import DashboardNavigator from "./src/navigation/DashboardNavigator";
 
 import { SearchProvider } from "./src/utils/SearchContext";
+import NotificationsScreen from "./src/components/screens/dashboard/NotificationsScreen/NotificationsScreen";
 
 const Stack = createStackNavigator();
 

@@ -23,7 +23,7 @@ const TaskScreen = () => {
     <View style={commonStyles.screenWrapper}>
       <Topbar />
       <TouchableOpacity
-        onPress={() => navigation.navigate("Tasks")}
+        onPress={() => navigation.navigate("TasksScreen")}
         style={{ flexDirection: "row", alignItems: "center" }}
       >
         <LeftArrow />
