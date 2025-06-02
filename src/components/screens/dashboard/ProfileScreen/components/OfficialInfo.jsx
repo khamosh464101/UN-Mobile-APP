@@ -88,7 +88,7 @@ const OfficialInfo = ({
         <View style={styles.iconWrapper}>
           <CalendarEditIcon />
         </View>
-        <View style={styles.textWrapper}>
+        <View style={[styles.textWrapper, { borderBottomWidth: 0 }]}>
           <Text style={styles.label}>Updated at</Text>
           <Text style={styles.value}>{updated}</Text>
         </View>

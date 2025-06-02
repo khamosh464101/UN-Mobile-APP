@@ -6,7 +6,6 @@ import { useNavigation } from "@react-navigation/native";
 import NotificationEmpty from "../../assets/icons/notification-empty.svg";
 import NotificationFull from "../../assets/icons/notification-full.svg";
 import { COLORS } from "../../styles/colors";
-const BellIcon = () => <BellIconEmpty width={30} height={30} />;
 
 const Topbar = () => {
   const navigation = useNavigation();
@@ -37,11 +36,17 @@ const Topbar = () => {
   }, [navigation]);
   return (
     <View style={styles.topBar}>
-      <View style={styles.avatar} />
-      <View style={{ marginLeft: 10 }}>
-        <Text style={styles.userName}>Atiqullah</Text>
-        <Text style={styles.userSubtitle}>Sadeqi</Text>
-      </View>
+      <TouchableOpacity
+        style={styles.profileWrapper}
+        onPress={() => navigation.navigate("Profile")}
+      >
+        <View style={styles.avatar} />
+        <View style={{ marginLeft: 10 }}>
+          <Text style={styles.userName}>Atiqullah</Text>
+          <Text style={styles.userSubtitle}>Sadeqi</Text>
+        </View>
+      </TouchableOpacity>
+
       <View style={{ flex: 1 }} />
       <TouchableOpacity
         style={styles.bellBtn}
@@ -61,6 +66,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 18,
     marginTop: 25,
+  },
+  profileWrapper: {
+    flexDirection: "row",
   },
   avatar: {
     width: 36,

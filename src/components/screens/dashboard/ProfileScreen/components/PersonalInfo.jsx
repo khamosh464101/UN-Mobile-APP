@@ -39,7 +39,7 @@ const ProfileInfoItem = ({ name, email, phone, staffDesc }) => {
         <View style={styles.iconWrapper}>
           <StaffDesc />
         </View>
-        <View style={styles.textWrapper}>
+        <View style={[styles.textWrapper, { borderBottomWidth: 0 }]}>
           <Text style={styles.label}>Staff Description</Text>
           <Text style={styles.value} numberOfLines={0}>
             {staffDesc}

@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import Topbar from "../../../common/Topbar";
 import { commonStyles } from "../../../../styles/commonStyles";
 import TabSwitcher from "../../../common/TabSwitcher";
@@ -8,6 +14,9 @@ import personalInfo from "../../../../utils/personalinfo.json";
 import officialInfo from "../../../../utils/officialinfo.json";
 import PersonalInfo from "./components/PersonalInfo";
 import OfficialInfo from "./components/OfficialInfo";
+import { COLORS } from "../../../../styles/colors";
+import LogoutIcon from "../../../../assets/icons/logout.svg";
+import LogoutButton from "../../../common/LogoutButton";
 
 export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState("personal");
@@ -41,6 +50,7 @@ export default function ProfileScreen() {
               />
             );
           })}
+          <LogoutButton />
         </ScrollView>
       ) : (
         <ScrollView
@@ -62,6 +72,7 @@ export default function ProfileScreen() {
               />
             );
           })}
+          <LogoutButton />
         </ScrollView>
       )}
     </View>
@@ -71,5 +82,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   scrollView: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
 });
