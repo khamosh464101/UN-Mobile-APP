@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -15,9 +15,10 @@ import { useNavigation } from "@react-navigation/native";
 import Topbar from "../../../common/Topbar";
 import NotificationItem from "./components/NotificationItem";
 import { commonStyles } from "../../../../styles/commonStyles";
-import { COLORS } from "../../../../styles/colors";
+import { ThemeContext } from "../../../../utils/ThemeContext";
 
 const NotificationsScreen = () => {
+  const { theme } = useContext(ThemeContext);
   const navigation = useNavigation();
   const [readNotifications, setReadNotifications] = useState([]);
 
@@ -71,19 +72,30 @@ const NotificationsScreen = () => {
   };
 
   return (
-    <View style={commonStyles.screenWrapper}>
+    <View
+      style={[
+        commonStyles.screenWrapper,
+        { backgroundColor: theme.colors.background },
+      ]}
+    >
       <Topbar />
 
       <TouchableOpacity
         onPress={handleClearNotifications}
-        style={styles.clearNotifications}
+        style={[
+          styles.clearNotifications,
+          { backgroundColor: theme.colors.danger },
+        ]}
       >
         <Text style={{ color: "#fff", textAlign: "center" }}>
           Clear all Notifications
         </Text>
       </TouchableOpacity>
 
-      <ScrollView style={{ paddingVertical: 15 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ paddingVertical: 15 }}
+      >
         {Array.isArray(notificationsData) &&
           notificationsData.map((n) => (
             <NotificationItem
@@ -102,7 +114,6 @@ export default NotificationsScreen;
 
 const styles = StyleSheet.create({
   clearNotifications: {
-    backgroundColor: COLORS.danger,
     paddingVertical: 10,
     borderRadius: 6,
     marginVertical: 17,

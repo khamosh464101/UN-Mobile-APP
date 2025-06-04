@@ -1,15 +1,11 @@
-import React from "react";
-import {
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  View,
-  ScrollView,
-} from "react-native";
-import { COLORS } from "../../../../../styles/colors";
+import React, { useContext } from "react";
+import { Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { ThemeContext } from "../../../../../utils/ThemeContext";
+
 const filters = ["All", "Open", "In Progress", "Closed"];
 
 const TaskFilter = ({ activeFilter, onFilterChange, tasks }) => {
+  const { theme } = useContext(ThemeContext);
   const countByStatus = (status) =>
     status === "All"
       ? tasks.length
@@ -27,10 +23,23 @@ const TaskFilter = ({ activeFilter, onFilterChange, tasks }) => {
         return (
           <TouchableOpacity
             key={item}
-            style={[styles.button, isActive && styles.activeButton]}
+            style={[
+              styles.button,
+              isActive
+                ? { backgroundColor: theme.colors.primary }
+                : {
+                    backgroundColor: theme.colors.lightBlack,
+                  },
+            ]}
             onPress={() => onFilterChange(item)}
           >
-            <Text style={[styles.text, isActive && styles.activeText]}>
+            <Text
+              style={[
+                styles.text,
+                { color: theme.colors.secondaryText },
+                isActive && styles.activeText,
+              ]}
+            >
               {item} ({countByStatus(item)})
             </Text>
           </TouchableOpacity>
@@ -53,19 +62,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginRight: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.lightGray,
     height: 35,
     alignItems: "center",
     justifyContent: "center",
   },
-  activeButton: {
-    backgroundColor: COLORS.primary,
-  },
   text: {
     fontSize: 14,
-    color: COLORS.subtitle,
   },
   activeText: {
-    color: COLORS.white,
+    color: "#fff",
   },
 });

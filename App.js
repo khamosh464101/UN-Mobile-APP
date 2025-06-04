@@ -12,18 +12,21 @@ import ForgotPasswordScreen from "./src/components/screens/auth/ForgotPasswordSc
 import DashboardNavigator from "./src/navigation/DashboardNavigator";
 
 import { SearchProvider } from "./src/utils/SearchContext";
-import NotificationsScreen from "./src/components/screens/dashboard/NotificationsScreen/NotificationsScreen";
+import { useContext } from "react";
+import { ThemeProvider, ThemeContext } from "./src/utils/ThemeContext";
 
 const Stack = createStackNavigator();
 
-export default function App() {
+function MainApp() {
+  const { theme } = useContext(ThemeContext);
+
   return (
     <SearchProvider>
       <NavigationContainer>
-        <StatusBar style="auto" />
+        <StatusBar style={theme.dark ? "light" : "dark"} />
         <Stack.Navigator
-          initialRouteName="Login"
           screenOptions={{ headerShown: false }}
+          initialRouteName="Login"
         >
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="OTP" component={OTPVerificationScreen} />
@@ -31,9 +34,21 @@ export default function App() {
             name="ForgotPassword"
             component={ForgotPasswordScreen}
           />
-          <Stack.Screen name="Dashboard" component={DashboardNavigator} />
+          <Stack.Screen
+            name="Dashboard"
+            theme={theme}
+            component={DashboardNavigator}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SearchProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }

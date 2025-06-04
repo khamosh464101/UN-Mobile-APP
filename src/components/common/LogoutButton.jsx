@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   StyleSheet,
   View,
@@ -7,14 +7,16 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { ThemeContext } from "../../utils/ThemeContext";
 import { COLORS } from "../../styles/colors";
 import LogoutIcon from "../../assets/icons/logout.svg";
 const LogoutButton = () => {
+  const { theme } = useContext(ThemeContext);
   const navigation = useNavigation();
   return (
     <View>
       <TouchableOpacity
-        style={styles.logoutBtn}
+        style={[styles.logoutBtn, { backgroundColor: theme.colors.primary }]}
         onPress={() =>
           navigation.reset({
             index: 0,
@@ -33,7 +35,6 @@ export default LogoutButton;
 
 const styles = StyleSheet.create({
   logoutBtn: {
-    backgroundColor: COLORS.primary,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   logoutText: {
-    color: COLORS.white,
+    color: "#fff",
     fontWeight: "500",
     fontSize: 14,
   },

@@ -1,19 +1,29 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { COLORS } from "../../styles/colors";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 const TabSwitcher = ({ tabs = [], activeTab, setActiveTab }) => {
+  const { theme } = useContext(ThemeContext);
   return (
-    <View style={styles.tabContainer}>
+    <View
+      style={[
+        styles.tabContainer,
+        { backgroundColor: theme.colors.lightBlack },
+      ]}
+    >
       {tabs.map((tab) => (
         <TouchableOpacity
           key={tab.key}
-          style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+          style={[
+            styles.tab,
+            activeTab === tab.key && { backgroundColor: theme.colors.primary },
+          ]}
           onPress={() => setActiveTab(tab.key)}
         >
           <Text
             style={[
               styles.tabText,
+              { color: theme.colors.secondaryText },
               activeTab === tab.key && styles.activeTabText,
             ]}
           >
@@ -28,7 +38,6 @@ const TabSwitcher = ({ tabs = [], activeTab, setActiveTab }) => {
 const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: COLORS.lightGray,
     borderRadius: 10,
     padding: 4,
     marginVertical: 20,
@@ -40,15 +49,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
-  activeTab: {
-    backgroundColor: COLORS.primary,
-  },
+
   tabText: {
     fontSize: 14,
-    color: COLORS.subtitle,
   },
   activeTabText: {
-    color: COLORS.white,
+    color: "#fff",
     fontWeight: "600",
   },
 });

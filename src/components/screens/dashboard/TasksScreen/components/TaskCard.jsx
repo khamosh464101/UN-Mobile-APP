@@ -1,27 +1,30 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { COLORS } from "../../../../../styles/colors";
-
-const getStatusStyle = (status) => {
-  switch (status.toLowerCase()) {
-    case "open":
-      return { backgroundColor: "#8b5cf6", color: "#fff" }; // Purple
-    case "in progress":
-      return { backgroundColor: "#fbbf24", color: "#000" }; // Yellow
-    case "closed":
-      return { backgroundColor: "#ef4444", color: "#fff" }; // Red
-    default:
-      return { backgroundColor: "#ccc", color: "#000" };
-  }
-};
+import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const TaskCard = ({ task, onPressViewDetails }) => {
+  const { theme } = useContext(ThemeContext);
+
+  const getStatusStyle = (status) => {
+    switch (status.toLowerCase()) {
+      case "open":
+        return { backgroundColor: theme.colors.primary, color: "#fff" }; // Purple
+      case "in progress":
+        return { backgroundColor: theme.colors.secondary, color: "#000" }; // Yellow
+      case "closed":
+        return { backgroundColor: theme.colors.danger, color: "#fff" }; // Red
+      default:
+        return { backgroundColor: "#ccc", color: "#000" };
+    }
+  };
   const statusStyle = getStatusStyle(task.status);
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: theme.colors.lightBlack }]}>
       <View>
         <View style={styles.header}>
-          <Text style={styles.title}>{task.title}</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>
+            {task.title}
+          </Text>
           <View
             style={[
               styles.statusBadge,
@@ -34,31 +37,51 @@ const TaskCard = ({ task, onPressViewDetails }) => {
           </View>
         </View>
 
-        <Text style={styles.subText}>#{task.id}</Text>
+        <Text style={[styles.subText, { color: theme.colors.secondaryText }]}>
+          #{task.id}
+        </Text>
       </View>
-      <View style={styles.seprator}></View>
+      <View
+        style={[
+          styles.seprator,
+          { borderBottomColor: theme.colors.background },
+        ]}
+      ></View>
 
       <View style={styles.infoRow}>
         <View style={styles.taskInfo}>
-          <Text style={styles.label}>Assigned By</Text>
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Assigned By
+          </Text>
           <View style={styles.avatarWrapper}>
-            <View style={styles.avatar}></View>
-            <Text style={styles.value}>{task.assignedBy.name}</Text>
+            <View
+              style={[
+                styles.avatar,
+                { backgroundColor: theme.colors.background },
+              ]}
+            ></View>
+            <Text style={[styles.value, { color: theme.colors.text }]}>
+              {task.assignedBy.name}
+            </Text>
           </View>
         </View>
         <View style={styles.taskInfo}>
-          <Text style={styles.label}>Deadline</Text>
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Deadline
+          </Text>
           <View style={styles.avatarWrapper}>
-            <Text style={styles.value}>{task.deadline}</Text>
+            <Text style={[styles.value, { color: theme.colors.text }]}>
+              {task.deadline}
+            </Text>
           </View>
         </View>
       </View>
 
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.button, { backgroundColor: theme.colors.primary }]}
         onPress={() => onPressViewDetails?.(task)}
       >
-        <Text style={styles.buttonText}>View Details</Text>
+        <Text style={[styles.buttonText, { color: "#fff" }]}>View Details</Text>
       </TouchableOpacity>
     </View>
   );
@@ -68,7 +91,6 @@ export default TaskCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.lightGray,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -94,14 +116,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   subText: {
-    color: COLORS.subtitle,
     marginTop: 4,
     fontSize: 12,
   },
   seprator: {
     marginTop: 10,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.inputBorder,
   },
   infoRow: {
     flexDirection: "column",
@@ -122,10 +142,8 @@ const styles = StyleSheet.create({
     height: 25,
     width: 25,
     borderRadius: 25,
-    backgroundColor: COLORS.white,
   },
   label: {
-    color: COLORS.subtitle,
     fontSize: 13,
   },
   value: {
@@ -133,13 +151,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   button: {
-    backgroundColor: COLORS.primary,
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: "center",
   },
   buttonText: {
-    color: COLORS.white,
     fontWeight: "600",
     fontSize: 14,
   },

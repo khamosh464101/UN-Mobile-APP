@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { commonStyles } from "../../../../styles/commonStyles";
 import Topbar from "../../../common/Topbar";
@@ -6,11 +6,13 @@ import TaskFilter from "./components/TaskFilter";
 import tasksData from "../../../../utils/tasks.json";
 import TaskCard from "./components/TaskCard";
 import { Dimensions } from "react-native";
+import { ThemeContext } from "../../../../utils/ThemeContext";
 
 const filters = ["All", "Open", "In Progress", "Closed"];
 const screenHeight = Dimensions.get("window").height;
 
 const TasksScreen = ({ navigation }) => {
+  const { theme } = useContext(ThemeContext);
   const handleViewDetails = (task) => {
     navigation.navigate("TaskDetails", { task });
   };
@@ -29,7 +31,12 @@ const TasksScreen = ({ navigation }) => {
         );
 
   return (
-    <View style={commonStyles.screenWrapper}>
+    <View
+      style={[
+        commonStyles.screenWrapper,
+        { backgroundColor: theme.colors.background },
+      ]}
+    >
       <Topbar />
       <TaskFilter
         activeFilter={activeFilter}
@@ -39,7 +46,10 @@ const TasksScreen = ({ navigation }) => {
         style={{ paddingVertical: 10 }}
       />
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+      >
         {filteredTasks.map((task, index) => (
           <TaskCard
             key={index}

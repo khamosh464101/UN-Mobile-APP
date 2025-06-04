@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -6,9 +6,10 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { COLORS } from "../../../../../styles/colors";
+import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const TaskDetails = ({ task }) => {
+  const { theme } = useContext(ThemeContext);
   const [status, setStatus] = useState(task.status);
 
   const statuses = ["Open", "In Progress", "Closed"];
@@ -17,16 +18,32 @@ const TaskDetails = ({ task }) => {
     <ScrollView
       contentContainerStyle={styles.scrollView}
       keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.taskInfo}>
-        <Text style={styles.taskInfoLabel}>Assigned By</Text>
+        <Text
+          style={[styles.taskInfoLabel, { color: theme.colors.secondaryText }]}
+        >
+          Assigned By
+        </Text>
         <View style={styles.taskInfoItemWrapper}>
-          <View style={styles.avatar}></View>
-          <Text style={styles.taskInfoValue}>{task.assignedBy.name}</Text>
+          <View
+            style={[
+              styles.avatar,
+              { backgroundColor: theme.colors.lightBlack },
+            ]}
+          ></View>
+          <Text style={[styles.taskInfoValue, { color: theme.colors.text }]}>
+            {task.assignedBy.name}
+          </Text>
         </View>
       </View>
       <View style={styles.taskInfo}>
-        <Text style={styles.taskInfoLabel}>Status</Text>
+        <Text
+          style={[styles.taskInfoLabel, { color: theme.colors.secondaryText }]}
+        >
+          Status
+        </Text>
         <View style={styles.taskStatusWrapper}>
           <View style={styles.taskStatus}>
             {statuses.map((item) => (
@@ -35,36 +52,68 @@ const TaskDetails = ({ task }) => {
                 onPress={() => setStatus(item)}
                 style={styles.taskStatusItem}
               >
-                <View style={styles.taskStatusItemDot}>
+                <View
+                  style={[
+                    styles.taskStatusItemDot,
+                    { borderColor: theme.colors.primary },
+                  ]}
+                >
                   {status === item && (
-                    <View style={styles.taskStatusItemDotActive} />
+                    <View
+                      style={[
+                        styles.taskStatusItemDotActive,
+                        { backgroundColor: theme.colors.primary },
+                      ]}
+                    />
                   )}
                 </View>
-                <Text style={styles.taskInfoValue}>{item}</Text>
+                <Text
+                  style={[styles.taskInfoValue, { color: theme.colors.text }]}
+                >
+                  {item}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
       </View>
       <View style={styles.taskInfo}>
-        <Text style={styles.taskInfoLabel}>Estimation</Text>
+        <Text
+          style={[styles.taskInfoLabel, { color: theme.colors.secondaryText }]}
+        >
+          Estimation
+        </Text>
         <View style={styles.taskInfoItemWrapper}>
-          <Text style={styles.taskInfoValue}>{task.estimationHours} Hours</Text>
+          <Text style={[styles.taskInfoValue, { color: theme.colors.text }]}>
+            {task.estimationHours} Hours
+          </Text>
         </View>
       </View>
       <View style={styles.taskInfo}>
-        <Text style={styles.taskInfoLabel}>Deadline</Text>
+        <Text
+          style={[styles.taskInfoLabel, { color: theme.colors.secondaryText }]}
+        >
+          Deadline
+        </Text>
         <View style={styles.taskInfoItemWrapper}>
-          <Text style={styles.taskInfoValue}>{task.deadline}</Text>
+          <Text style={[styles.taskInfoValue, { color: theme.colors.text }]}>
+            {task.deadline}
+          </Text>
         </View>
       </View>
       <View style={styles.taskDetails}>
         <View>
-          <Text style={styles.taskTitle}>{task.title}</Text>
+          <Text style={[styles.taskTitle, { color: theme.colors.text }]}>
+            {task.title}
+          </Text>
 
-          <Text style={styles.taskId}>#{task.id}</Text>
+          <Text style={[styles.taskId, { color: theme.colors.secondaryText }]}>
+            #{task.id}
+          </Text>
         </View>
-        <Text style={styles.description}>{task.description}</Text>
+        <Text style={[styles.description, { color: theme.colors.text }]}>
+          {task.description}
+        </Text>
       </View>
     </ScrollView>
   );
@@ -91,7 +140,6 @@ const styles = StyleSheet.create({
     height: 25,
     width: 25,
     borderRadius: 25,
-    backgroundColor: COLORS.lightGray,
   },
   taskStatusWrapper: {
     flexDirection: "row",
@@ -105,7 +153,6 @@ const styles = StyleSheet.create({
   },
   taskInfoLabel: {
     fontSize: 13,
-    color: COLORS.subtitle,
   },
   taskInfoValue: {
     fontSize: 13,
@@ -121,7 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   taskId: {
-    color: COLORS.subtitle,
     marginTop: 4,
     fontSize: 12,
   },
@@ -139,7 +185,6 @@ const styles = StyleSheet.create({
     width: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: COLORS.subtitle,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -148,6 +193,5 @@ const styles = StyleSheet.create({
     height: 10,
     width: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.subtitle,
   },
 });

@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import ProfileTickIcon from "../../../../../assets/icons/profile/profile-tick.svg";
+import ProfileTickDarkIcon from "../../../../../assets/icons/profile/profile-tick-dark.svg";
 import PositionIcon from "../../../../../assets/icons/profile/shield-tick.svg";
+import PositionDarkIcon from "../../../../../assets/icons/profile/shield-tick-dark.svg";
 import EmailIcon from "../../../../../assets/icons/profile/email.svg";
+import EmailDarkIcon from "../../../../../assets/icons/profile/email-dark.svg";
 import PhoneIcon from "../../../../../assets/icons/profile/phone.svg";
+import PhoneDarkIcon from "../../../../../assets/icons/profile/phone-dark.svg";
 import MapIcon from "../../../../../assets/icons/profile/map.svg";
+import MapDarkIcon from "../../../../../assets/icons/profile/map-dark.svg";
 import CalendarTickIcon from "../../../../../assets/icons/profile/calendar-tick.svg";
+import CalendarTickDarkIcon from "../../../../../assets/icons/profile/calendar-tick-dark.svg";
 import CalendarIcon from "../../../../../assets/icons/profile/calendar.svg";
+import CalendarDarkIcon from "../../../../../assets/icons/profile/calendar-dark.svg";
 import CalendarEditIcon from "../../../../../assets/icons/profile/calendar-edit.svg";
+import CalendarEditDarkIcon from "../../../../../assets/icons/profile/calendar-edit-dark.svg";
+import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const OfficialInfo = ({
   status,
@@ -19,78 +28,147 @@ const OfficialInfo = ({
   created,
   updated,
 }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme.dark;
   return (
     <View>
       <View style={styles.container}>
         <View style={styles.iconWrapper}>
-          <ProfileTickIcon />
+          {isDark ? <ProfileTickDarkIcon /> : <ProfileTickIcon />}
         </View>
-        <View style={styles.textWrapper}>
-          <Text style={styles.label}>Status</Text>
-          <Text style={styles.value}>{status}</Text>
-        </View>
-      </View>
-      <View style={styles.container}>
-        <View style={styles.iconWrapper}>
-          <PositionIcon />
-        </View>
-        <View style={styles.textWrapper}>
-          <Text style={styles.label}>Position</Text>
-          <Text style={styles.value}>{position}</Text>
-        </View>
-      </View>
-      <View style={styles.container}>
-        <View style={styles.iconWrapper}>
-          <EmailIcon />
-        </View>
-        <View style={styles.textWrapper}>
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.value}>{email}</Text>
+        <View
+          style={[
+            styles.textWrapper,
+            { borderBottomColor: theme.colors.lightBlack },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Status
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {status}
+          </Text>
         </View>
       </View>
       <View style={styles.container}>
         <View style={styles.iconWrapper}>
-          <PhoneIcon />
+          {isDark ? <PositionDarkIcon /> : <PositionIcon />}
         </View>
-        <View style={styles.textWrapper}>
-          <Text style={styles.label}>Phone</Text>
-          <Text style={styles.value}>{phone}</Text>
-        </View>
-      </View>
-      <View style={styles.container}>
-        <View style={styles.iconWrapper}>
-          <MapIcon />
-        </View>
-        <View style={styles.textWrapper}>
-          <Text style={styles.label}>Duty Station</Text>
-          <Text style={styles.value}>{duty}</Text>
-        </View>
-      </View>
-      <View style={styles.container}>
-        <View style={styles.iconWrapper}>
-          <CalendarTickIcon />
-        </View>
-        <View style={styles.textWrapper}>
-          <Text style={styles.label}>Date of Joining</Text>
-          <Text style={styles.value}>{joined}</Text>
+        <View
+          style={[
+            styles.textWrapper,
+            { borderBottomColor: theme.colors.lightBlack },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Position
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {position}
+          </Text>
         </View>
       </View>
       <View style={styles.container}>
         <View style={styles.iconWrapper}>
-          <CalendarIcon />
+          {isDark ? <EmailDarkIcon /> : <EmailIcon />}
         </View>
-        <View style={styles.textWrapper}>
-          <Text style={styles.label}>Created at</Text>
-          <Text style={styles.value}>{created}</Text>
+        <View
+          style={[
+            styles.textWrapper,
+            { borderBottomColor: theme.colors.lightBlack },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Email
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {email}
+          </Text>
         </View>
       </View>
       <View style={styles.container}>
         <View style={styles.iconWrapper}>
-          <CalendarEditIcon />
+          {isDark ? <PhoneDarkIcon /> : <PhoneIcon />}
+        </View>
+        <View
+          style={[
+            styles.textWrapper,
+            { borderBottomColor: theme.colors.lightBlack },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Phone
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {phone}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.container}>
+        <View style={styles.iconWrapper}>
+          {isDark ? <MapDarkIcon /> : <MapIcon />}
+        </View>
+        <View
+          style={[
+            styles.textWrapper,
+            { borderBottomColor: theme.colors.lightBlack },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Duty Station
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {duty}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.container}>
+        <View style={styles.iconWrapper}>
+          {isDark ? <CalendarTickDarkIcon /> : <CalendarTickIcon />}
+        </View>
+        <View
+          style={[
+            styles.textWrapper,
+            { borderBottomColor: theme.colors.lightBlack },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Date of Joining
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {joined}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.container}>
+        <View style={styles.iconWrapper}>
+          {isDark ? <CalendarDarkIcon /> : <CalendarIcon />}
+        </View>
+        <View
+          style={[
+            styles.textWrapper,
+            { borderBottomColor: theme.colors.lightBlack },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Created at
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {created}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.container}>
+        <View style={styles.iconWrapper}>
+          {isDark ? <CalendarEditDarkIcon /> : <CalendarEditIcon />}
         </View>
         <View style={[styles.textWrapper, { borderBottomWidth: 0 }]}>
-          <Text style={styles.label}>Updated at</Text>
-          <Text style={styles.value}>{updated}</Text>
+          <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
+            Updated at
+          </Text>
+          <Text style={[styles.value, { color: theme.colors.text }]}>
+            {updated}
+          </Text>
         </View>
       </View>
     </View>

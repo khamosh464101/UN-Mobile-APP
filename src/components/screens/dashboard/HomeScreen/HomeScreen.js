@@ -11,9 +11,11 @@ import Topbar from "../../../common/Topbar";
 import Search from "../../../common/Search";
 import { commonStyles } from "../../../../styles/commonStyles";
 import tasksData from "../../../../utils/tasks.json";
+import { ThemeContext } from "../../../../utils/ThemeContext";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
+  const { theme } = useContext(ThemeContext);
   const { setSearchKeyword, setSearchResults } = useContext(SearchContext);
 
   const handleSearch = (keyword) => {
@@ -27,8 +29,13 @@ export default function HomeScreen() {
     navigation.navigate("Search");
   };
   return (
-    <View style={commonStyles.screenWrapper}>
-      <StatusBar barStyle="dark-content" />
+    <View
+      style={[
+        commonStyles.screenWrapper,
+        { backgroundColor: theme.colors.background },
+      ]}
+    >
+      <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} />
 
       <View style={styles.topBarWrapper}>
         <Topbar />
@@ -39,6 +46,7 @@ export default function HomeScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <HeroCard TaskCount="02" TaskType="In Progress Tasks" />
 
@@ -68,7 +76,7 @@ const styles = StyleSheet.create({
 
   scrollViewWrapper: {
     flex: 1,
-    paddingVertical: 15,
+    paddingVertical: 0,
   },
   scrollView: {
     flexGrow: 1,

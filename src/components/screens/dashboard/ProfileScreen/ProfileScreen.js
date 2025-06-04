@@ -1,11 +1,5 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState, useContext } from "react";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
 import Topbar from "../../../common/Topbar";
 import { commonStyles } from "../../../../styles/commonStyles";
 import TabSwitcher from "../../../common/TabSwitcher";
@@ -14,11 +8,13 @@ import personalInfo from "../../../../utils/personalinfo.json";
 import officialInfo from "../../../../utils/officialinfo.json";
 import PersonalInfo from "./components/PersonalInfo";
 import OfficialInfo from "./components/OfficialInfo";
-import { COLORS } from "../../../../styles/colors";
-import LogoutIcon from "../../../../assets/icons/logout.svg";
-import LogoutButton from "../../../common/LogoutButton";
+
+import { ThemeContext } from "../../../../utils/ThemeContext";
+import { Button } from "../../../common/Button";
 
 export default function ProfileScreen() {
+  const { theme } = useContext(ThemeContext);
+  const { themeMode, changeTheme } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState("personal");
 
   const tabs = [
@@ -27,7 +23,12 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <View style={commonStyles.screenWrapper}>
+    <View
+      style={[
+        commonStyles.screenWrapper,
+        { backgroundColor: theme.colors.background },
+      ]}
+    >
       <Topbar />
       <TabSwitcher
         tabs={tabs}
@@ -38,6 +39,7 @@ export default function ProfileScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           {personalInfo?.map((item, index) => {
             return (
@@ -50,12 +52,12 @@ export default function ProfileScreen() {
               />
             );
           })}
-          <LogoutButton />
         </ScrollView>
       ) : (
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           {officialInfo?.map((item, index) => {
             return (
@@ -72,7 +74,15 @@ export default function ProfileScreen() {
               />
             );
           })}
-          <LogoutButton />
+          <View style={{ padding: 20 }}>
+            <Text>Current theme: {themeMode}</Text>
+            <Button title="Light Theme" onPress={() => changeTheme("light")} />
+            <Button title="Dark Theme" onPress={() => changeTheme("dark")} />
+            <Button
+              title="System Theme"
+              onPress={() => changeTheme("system")}
+            />
+          </View>
         </ScrollView>
       )}
     </View>

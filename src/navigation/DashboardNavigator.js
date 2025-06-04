@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 
@@ -9,26 +9,36 @@ import SearchScreen from "../components/screens/dashboard/SearchScreen/SearchScr
 import NotificationsScreen from "../components/screens/dashboard/NotificationsScreen/NotificationsScreen";
 import TasksScreen from "../components/screens/dashboard/TasksScreen/TasksScreen";
 import TaskScreen from "../components/screens/dashboard/TasksScreen/TaskScreen";
+import SettingsScreen from "../components/screens/dashboard/SettingsScreen/SettingsScreen";
 // import TaskStackNavigator from "./TaskStackNavigator";
 
 // Import icons
 import HomeActiveIcon from "../assets/icons/home-active.svg";
 import HomeIcon from "../assets/icons/home.svg";
+import HomeDarkIcon from "../assets/icons/home-dark.svg";
 import ProfileActiveIcon from "../assets/icons/profile-active.svg";
 import ProfileIcon from "../assets/icons/profile.svg";
+import ProfileDarkIcon from "../assets/icons/profile-dark.svg";
 import SearchActiveIcon from "../assets/icons/search-active.svg";
 import SearchIcon from "../assets/icons/search.svg";
+import SearchDarkIcon from "../assets/icons/search-dark.svg";
 import TaskActiveIcon from "../assets/icons/task-active.svg";
 import TaskIcon from "../assets/icons/task.svg";
+import TaskDarkIcon from "../assets/icons/task-dark.svg";
+import SettingsIcon from "../assets/icons/settings.svg";
+import SettingsActiveIcon from "../assets/icons/settings-active.svg";
+import SettingsDarkIcon from "../assets/icons/settings-dark.svg";
 
 // Import styles
 import { COLORS } from "../styles/colors";
+import { ThemeContext } from "../utils/ThemeContext";
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
 const TasksStack = createStackNavigator();
 const SearchStack = createStackNavigator();
 const ProfileStack = createStackNavigator();
+const SettingsStack = createStackNavigator();
 
 function HomeStackScreen() {
   return (
@@ -81,17 +91,46 @@ function ProfileStackScreen() {
     </ProfileStack.Navigator>
   );
 }
+function SettingsStackScreen() {
+  return (
+    <SettingsStack.Navigator screenOptions={{ headerShown: false }}>
+      <SettingsStack.Screen name="SettingsScreen" component={SettingsScreen} />
+      <SettingsStack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+      />
+    </SettingsStack.Navigator>
+  );
+}
 
 export default function DashboardNavigator() {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme.dark;
   return (
-    <Tab.Navigator initialRouteName="Home">
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: theme.colors.lightBlack,
+          borderTopColor: theme.colors.background,
+        },
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.text,
+      }}
+      initialRouteName="Home"
+    >
       <Tab.Screen
         name="Home"
         component={HomeStackScreen}
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            focused ? <HomeActiveIcon /> : <HomeIcon />,
+          tabBarIcon: ({ focused }) => {
+            if (focused) {
+              return <HomeActiveIcon />;
+            } else {
+              return isDark ? <HomeDarkIcon /> : <HomeIcon />;
+            }
+          },
           tabBarActiveTintColor: COLORS.primary,
         }}
       />
@@ -100,8 +139,13 @@ export default function DashboardNavigator() {
         component={TasksStackScreen}
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            focused ? <TaskActiveIcon /> : <TaskIcon />,
+          tabBarIcon: ({ focused }) => {
+            if (focused) {
+              return <TaskActiveIcon />;
+            } else {
+              return isDark ? <TaskDarkIcon /> : <TaskIcon />;
+            }
+          },
           tabBarActiveTintColor: COLORS.primary,
         }}
       />
@@ -110,8 +154,13 @@ export default function DashboardNavigator() {
         component={SearchStackSCreen}
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            focused ? <SearchActiveIcon /> : <SearchIcon />,
+          tabBarIcon: ({ focused }) => {
+            if (focused) {
+              return <SearchActiveIcon />;
+            } else {
+              return isDark ? <SearchDarkIcon /> : <SearchIcon />;
+            }
+          },
           tabBarActiveTintColor: COLORS.primary,
         }}
       />
@@ -120,8 +169,28 @@ export default function DashboardNavigator() {
         component={ProfileStackScreen}
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            focused ? <ProfileActiveIcon /> : <ProfileIcon />,
+          tabBarIcon: ({ focused }) => {
+            if (focused) {
+              return <ProfileActiveIcon />;
+            } else {
+              return isDark ? <ProfileDarkIcon /> : <ProfileIcon />;
+            }
+          },
+          tabBarActiveTintColor: COLORS.primary,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsStackScreen}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => {
+            if (focused) {
+              return <SettingsActiveIcon />;
+            } else {
+              return isDark ? <SettingsDarkIcon /> : <SettingsIcon />;
+            }
+          },
           tabBarActiveTintColor: COLORS.primary,
         }}
       />

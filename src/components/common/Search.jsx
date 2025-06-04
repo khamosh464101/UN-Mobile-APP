@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   StyleSheet,
   View,
@@ -7,14 +7,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import SearchIconTransparent from "../../assets/icons/search.svg";
+import SearchIcon from "../../assets/icons/search.svg";
+import SearchDarkIcon from "../../assets/icons/search-dark.svg";
 import SearchSubmitIcon from "../../assets/icons/search-submit.svg";
-import { COLORS } from "../../styles/colors";
-
-const RefreshIcon = () => <SearchSubmitIcon width={25} height={25} />;
-const SearchIcon = () => <SearchIconTransparent width={25} height={25} />;
+import SearchSubmitDarkIcon from "../../assets/icons/search-submit-dark.svg";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 const Search = ({ onSearch, value, onChangeText, placeholder }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme.dark;
   const [query, setQuery] = useState("");
 
   const isControlled =
@@ -31,17 +32,21 @@ const Search = ({ onSearch, value, onChangeText, placeholder }) => {
   };
   return (
     <View>
-      <Text style={styles.searchTitle}>
+      <Text style={[styles.searchTitle, { color: theme.colors.text }]}>
         Search For an {"\n"}
-        <Text style={styles.searchEntry}>Entry</Text>
+        <Text style={[styles.searchEntry, { color: theme.colors.primary }]}>
+          Entry
+        </Text>
       </Text>
       <View style={styles.searchBarRow}>
-        <View style={styles.searchBar}>
+        <View
+          style={[styles.searchBar, { borderColor: theme.colors.lightBlack }]}
+        >
           <View style={styles.searchIcon}>
-            <SearchIcon />
+            {isDark ? <SearchDarkIcon /> : <SearchIcon />}
           </View>
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: theme.colors.text }]}
             value={inputValue}
             onChangeText={setInputValue}
             onSubmitEditing={handleSubmit}
@@ -49,7 +54,7 @@ const Search = ({ onSearch, value, onChangeText, placeholder }) => {
             returnKeyType="search"
           />
           <TouchableOpacity style={styles.refreshBtn} onPress={handleSubmit}>
-            <RefreshIcon />
+            {isDark ? <SearchSubmitDarkIcon /> : <SearchSubmitIcon />}
           </TouchableOpacity>
         </View>
       </View>
@@ -67,7 +72,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   searchEntry: {
-    color: COLORS.primary,
     fontWeight: "bold",
   },
   searchBarRow: {
@@ -80,7 +84,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: COLORS.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 12,
   },

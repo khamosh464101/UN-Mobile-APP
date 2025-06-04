@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { COLORS } from "../../../../../styles/colors";
 import CloseIcon from "../../../../../assets/icons/close.svg";
+import CloseDarkIcon from "../../../../../assets/icons/close-dark.svg";
+import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const NotificationItem = ({ notification, isRead, onPress }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme.dark;
   const renderMessage = (notification) => {
     switch (notification.type) {
       case "comment":
@@ -19,17 +22,33 @@ const NotificationItem = ({ notification, isRead, onPress }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.notificationCard, isRead && styles.readNotification]}
+      style={[
+        styles.notificationCard,
+        { backgroundColor: theme.colors.secondaryBackground },
+        isRead && [
+          styles.readNotification,
+          { backgroundColor: theme.colors.lightBlack },
+        ],
+      ]}
     >
-      <View style={styles.avatar} />
+      <View
+        style={[styles.avatar, { backgroundColor: theme.colors.background }]}
+      />
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 14 }}>{renderMessage(notification)}</Text>
-        <Text style={{ fontSize: 12, color: COLORS.subtitle }}>
+        <Text
+          style={[
+            { fontSize: 14, color: theme.colors.text, fontWeight: "600" },
+            isRead && { fontWeight: "400" },
+          ]}
+        >
+          {renderMessage(notification)}
+        </Text>
+        <Text style={{ fontSize: 12, color: theme.colors.secondaryText }}>
           {notification.timeAgo}
         </Text>
       </View>
       <TouchableOpacity>
-        <CloseIcon />
+        {isDark ? <CloseDarkIcon /> : <CloseIcon />}
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -39,7 +58,6 @@ export default NotificationItem;
 
 const styles = StyleSheet.create({
   notificationCard: {
-    backgroundColor: COLORS.background,
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
@@ -47,13 +65,10 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 12,
   },
-  readNotification: {
-    backgroundColor: COLORS.lightGray,
-  },
+  readNotification: {},
   avatar: {
     height: 36,
     width: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.white,
   },
 });

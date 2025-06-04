@@ -6,8 +6,10 @@ import Search from "../../../common/Search";
 import { SearchContext } from "../../../../utils/SearchContext";
 import tasksData from "../../../../utils/tasks.json";
 import TaskCard from "../TasksScreen/components/TaskCard";
+import { ThemeContext } from "../../../../utils/ThemeContext";
 
 export default function SearchScreen({ navigation }) {
+  const { theme } = useContext(ThemeContext);
   const handleViewDetails = (task) => {
     navigation.navigate("Tasks", {
       screen: "TaskDetails",
@@ -47,14 +49,19 @@ export default function SearchScreen({ navigation }) {
   };
 
   return (
-    <View style={commonStyles.screenWrapper}>
+    <View
+      style={[
+        commonStyles.screenWrapper,
+        { backgroundColor: theme.colors.background },
+      ]}
+    >
       <Topbar />
       <Search
         value={localKeyword}
         onChangeText={handleChange}
         placeholder="Search by title or ID..."
       />
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {searchResults?.map((task) => (
           <TaskCard
             key={task.id}

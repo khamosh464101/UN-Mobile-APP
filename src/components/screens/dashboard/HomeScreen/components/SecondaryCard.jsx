@@ -1,24 +1,38 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, View, Text, ImageBackground } from "react-native";
 import TasksIcon from "../../../../../assets/icons/task-white.svg";
 import { COLORS } from "../../../../../styles/colors";
+import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const TaskIcon = () => <TasksIcon width={35} height={35} />;
 
 const SecondaryCard = ({ TaskCount, TaskType }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme.dark;
+  const backgroundImage = isDark
+    ? require("../../../../../assets/images/secondary-card-bg-dark.png")
+    : require("../../../../../assets/images/secondar-card-bg.png");
   return (
     <View style={styles.statCard}>
-      <ImageBackground
-        source={require("../../../../../assets/images/secondar-card-bg.png")}
-        style={styles.image}
-      >
+      <ImageBackground source={backgroundImage} style={styles.image}>
         <View style={styles.CardContent}>
-          <View style={styles.CardIconWrapper}>
+          <View
+            style={[
+              styles.CardIconWrapper,
+              { backgroundColor: theme.colors.primary },
+            ]}
+          >
             <TaskIcon />
           </View>
           <View style={styles.CardContentText}>
-            <Text style={styles.statCount}>{TaskCount}</Text>
-            <Text style={styles.statLabel}>{TaskType}</Text>
+            <Text style={[styles.statCount, { color: theme.colors.text }]}>
+              {TaskCount}
+            </Text>
+            <Text
+              style={[styles.statLabel, { color: theme.colors.secondaryText }]}
+            >
+              {TaskType}
+            </Text>
           </View>
         </View>
       </ImageBackground>
@@ -46,7 +60,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
     height: 56,
     width: 56,
-    backgroundColor: COLORS.primary,
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
@@ -64,12 +77,10 @@ const styles = StyleSheet.create({
   statCount: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#222",
     marginTop: -8,
     marginBottom: 2,
   },
   statLabel: {
     fontSize: 14,
-    color: "#888",
   },
 });

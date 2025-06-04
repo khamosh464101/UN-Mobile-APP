@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import {
   View,
@@ -10,12 +10,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-
-import { COLORS } from "../../../../../styles/colors";
-
 import SendIcon from "../../../../../assets/icons/send.svg";
+import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const TaskUpdates = ({ task }) => {
+  const { theme } = useContext(ThemeContext);
   const [input, setInput] = useState("");
   const [comments, setComments] = useState(task.comments || []);
 
@@ -48,19 +47,47 @@ const TaskUpdates = ({ task }) => {
               padding: 20,
             }}
           >
-            <Text style={{ fontSize: 13, color: "#888", textAlign: "center" }}>
+            <Text
+              style={{
+                fontSize: 13,
+                color: theme.colors.secondaryText,
+                textAlign: "center",
+              }}
+            >
               No updates yet on this task
             </Text>
           </View>
         ) : (
-          <ScrollView contentContainerStyle={styles.scrollContent}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
             {comments.map((comment) => (
               <View key={comment.id} style={styles.commentContainer}>
-                <View style={styles.avatar} />
-                <View style={styles.commentBox}>
-                  <Text style={styles.author}>{comment.author}</Text>
-                  <Text style={styles.message}>{comment.message}</Text>
-                  <Text style={styles.timestamp}>
+                <View
+                  style={[
+                    styles.avatar,
+                    { backgroundColor: theme.colors.lightBlack },
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.commentBox,
+                    { backgroundColor: theme.colors.lightBlack },
+                  ]}
+                >
+                  <Text style={[styles.author, { color: theme.colors.text }]}>
+                    {comment.author}
+                  </Text>
+                  <Text style={[styles.message, { color: theme.colors.text }]}>
+                    {comment.message}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.timestamp,
+                      { color: theme.colors.secondaryText },
+                    ]}
+                  >
                     {comment.timestamp.split(" ")[0]} 
                     {comment.timestamp.split(" ")[1]}
                   </Text>
@@ -73,8 +100,15 @@ const TaskUpdates = ({ task }) => {
         {/* Comment Input */}
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                backgroundColor: theme.colors.lightBlack,
+                color: theme.colors.text,
+              },
+            ]}
             placeholder="Type here ..."
+            placeholderTextColor={theme.colors.secondaryText}
             value={input}
             onChangeText={setInput}
           />
@@ -104,12 +138,10 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.lightGray,
     marginRight: 12,
   },
   commentBox: {
     flex: 1,
-    backgroundColor: COLORS.lightGray,
     borderRadius: 12,
     padding: 12,
   },
@@ -118,23 +150,18 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   message: {
-    color: COLORS.black,
     marginBottom: 8,
   },
   timestamp: {
     fontSize: 12,
-    color: COLORS.subtitle,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    // borderTopWidth: 1,
-    // borderTopColor: COLORS.lightGray,
     paddingVertical: 12,
   },
   input: {
     flex: 1,
-    backgroundColor: COLORS.lightGray,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,

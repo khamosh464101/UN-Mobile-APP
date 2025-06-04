@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import notificationsData from "../../utils/notificationsData.json";
 import { useNavigation } from "@react-navigation/native";
 import NotificationEmpty from "../../assets/icons/notification-empty.svg";
+import NotificationEmptyDark from "../../assets/icons/notification-empty-dark.svg";
 import NotificationFull from "../../assets/icons/notification-full.svg";
+import NotificationFullDark from "../../assets/icons/notification-full-dark.svg";
 import { COLORS } from "../../styles/colors";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 const Topbar = () => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme.dark;
   const navigation = useNavigation();
   const [hasUnread, setHasUnread] = useState(false);
 
@@ -34,16 +39,33 @@ const Topbar = () => {
 
     return unsubscribe;
   }, [navigation]);
+
+  let NotificationIcon;
+
+  if (hasUnread) {
+    NotificationIcon = isDark ? NotificationFullDark : NotificationFull;
+  } else {
+    NotificationIcon = isDark ? NotificationEmptyDark : NotificationEmpty;
+  }
+
   return (
     <View style={styles.topBar}>
       <TouchableOpacity
         style={styles.profileWrapper}
         onPress={() => navigation.navigate("Profile")}
       >
-        <View style={styles.avatar} />
+        <View
+          style={[styles.avatar, { backgroundColor: theme.colors.lightBlack }]}
+        />
         <View style={{ marginLeft: 10 }}>
-          <Text style={styles.userName}>Atiqullah</Text>
-          <Text style={styles.userSubtitle}>Sadeqi</Text>
+          <Text style={[styles.userName, { color: theme.colors.text }]}>
+            Atiqullah
+          </Text>
+          <Text
+            style={[styles.userSubtitle, { color: theme.colors.secondaryText }]}
+          >
+            Sadeqi
+          </Text>
         </View>
       </TouchableOpacity>
 
@@ -52,7 +74,7 @@ const Topbar = () => {
         style={styles.bellBtn}
         onPress={() => navigation.navigate("Notifications")}
       >
-        {hasUnread ? <NotificationFull /> : <NotificationEmpty />}
+        {<NotificationIcon />}
       </TouchableOpacity>
     </View>
   );
@@ -74,7 +96,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.lightGray,
   },
   userName: {
     fontWeight: "bold",
