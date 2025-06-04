@@ -1,4 +1,3 @@
-// src/context/ThemeContext.js
 import React, { createContext, useEffect, useState } from "react";
 import { Appearance } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,43 +7,45 @@ export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [themeMode, setThemeMode] = useState("system");
+  const [colorScheme, setColorScheme] = useState(Appearance.getColorScheme()); // <- NEW
   const [theme, setTheme] = useState(lightTheme);
 
-  // Apply theme based on mode
-  const applyTheme = (mode) => {
-    if (mode === "dark") {
-      setTheme(darkTheme);
-    } else if (mode === "light") {
+  // Load saved preference once
+  useEffect(() => {
+    const loadThemePreference = async () => {
+      const storedMode = await AsyncStorage.getItem("themeMode");
+      const mode = storedMode || "system";
+      setThemeMode(mode);
+    };
+
+    loadThemePreference();
+  }, []);
+
+  // Listen to system theme changes ONCE
+  useEffect(() => {
+    const listener = Appearance.addChangeListener(({ colorScheme }) => {
+      setColorScheme(colorScheme); // <- this will trigger applyTheme if in 'system'
+    });
+
+    return () => listener.remove();
+  }, []);
+
+  // Apply theme when themeMode or system colorScheme changes
+  useEffect(() => {
+    if (themeMode === "light") {
       setTheme(lightTheme);
+    } else if (themeMode === "dark") {
+      setTheme(darkTheme);
     } else {
-      const systemColorScheme = Appearance.getColorScheme();
-      setTheme(systemColorScheme === "dark" ? darkTheme : lightTheme);
+      setTheme(colorScheme === "dark" ? darkTheme : lightTheme);
     }
-  };
+  }, [themeMode, colorScheme]); // <- DEPENDS ON BOTH
 
   const changeTheme = async (mode) => {
     await AsyncStorage.setItem("themeMode", mode);
     setThemeMode(mode);
-    applyTheme(mode);
   };
-
-  // Load stored mode and apply on mount
-  useEffect(() => {
-    const loadTheme = async () => {
-      const savedMode = await AsyncStorage.getItem("themeMode");
-      const initialMode = savedMode || "system";
-      setThemeMode(initialMode);
-      applyTheme(initialMode);
-    };
-
-    loadTheme();
-
-    const subscription = Appearance.addChangeListener(() => {
-      if (themeMode === "system") applyTheme("system");
-    });
-
-    return () => subscription.remove();
-  }, [themeMode]);
+  console.log("System color scheme is:", Appearance.getColorScheme());
 
   return (
     <ThemeContext.Provider value={{ theme, themeMode, changeTheme }}>

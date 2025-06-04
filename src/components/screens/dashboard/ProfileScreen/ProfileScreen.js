@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { StyleSheet, View, Text, ScrollView } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import Topbar from "../../../common/Topbar";
 import { commonStyles } from "../../../../styles/commonStyles";
 import TabSwitcher from "../../../common/TabSwitcher";
@@ -10,11 +10,9 @@ import PersonalInfo from "./components/PersonalInfo";
 import OfficialInfo from "./components/OfficialInfo";
 
 import { ThemeContext } from "../../../../utils/ThemeContext";
-import { Button } from "../../../common/Button";
 
 export default function ProfileScreen() {
   const { theme } = useContext(ThemeContext);
-  const { themeMode, changeTheme } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState("personal");
 
   const tabs = [
@@ -74,15 +72,6 @@ export default function ProfileScreen() {
               />
             );
           })}
-          <View style={{ padding: 20 }}>
-            <Text>Current theme: {themeMode}</Text>
-            <Button title="Light Theme" onPress={() => changeTheme("light")} />
-            <Button title="Dark Theme" onPress={() => changeTheme("dark")} />
-            <Button
-              title="System Theme"
-              onPress={() => changeTheme("system")}
-            />
-          </View>
         </ScrollView>
       )}
     </View>
