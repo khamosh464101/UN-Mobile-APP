@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "type": "input_integer",
+    "question": "How many people live in your household?",
+    "options": []
+  },
+  {
+    "id": 2,
+    "type": "geopoint",
+    "question": "Mark the location of your nearest health clinic.",
+    "options": []
+  },
+  {
+    "id": 3,
+    "type": "checkbox",
+    "question": "Which services do you have access to?",
+    "options": ["Internet", "Cable TV", "Telephone", "Mobile Data"]
+  },
+  {
+    "id": 4,
+    "type": "radio",
+    "question": "Do you use gas or electric stove?",
+    "options": ["Gas", "Electric", "Both"]
+  },
+  {
+    "id": 5,
+    "type": "input_photo",
+    "question": "Take a photo of the front of your house.",
+    "options": []
+  },
+  {
+    "id": 6,
+    "type": "input_photo",
+    "question": "Take a photo of your identification document.",
+    "options": []
+  },
+  {
+    "id": 7,
+    "type": "input_date",
+    "question": "When did you move in?",
+    "options": []
+  },
+  {
+    "id": 8,
+    "type": "input_text",
+    "question": "What is your full name?",
+    "options": []
+  }
+]

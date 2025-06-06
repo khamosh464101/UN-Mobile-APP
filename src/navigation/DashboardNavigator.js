@@ -10,6 +10,7 @@ import NotificationsScreen from "../components/screens/dashboard/NotificationsSc
 import TasksScreen from "../components/screens/dashboard/TasksScreen/TasksScreen";
 import TaskScreen from "../components/screens/dashboard/TasksScreen/TaskScreen";
 import SettingsScreen from "../components/screens/dashboard/SettingsScreen/SettingsScreen";
+import TakeSurvey from "../components/screens/dashboard/TakeSurvey/TakeSurvey";
 // import TaskStackNavigator from "./TaskStackNavigator";
 
 // Import icons
@@ -28,14 +29,19 @@ import TaskDarkIcon from "../assets/icons/task-dark.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
 import SettingsActiveIcon from "../assets/icons/settings-active.svg";
 import SettingsDarkIcon from "../assets/icons/settings-dark.svg";
+import PlusIcon from "../assets/icons/plus.svg";
+import PlusDarkIcon from "../assets/icons/plus-dark.svg";
+import PlusActiveIcon from "../assets/icons/plus-active.svg";
 
 // Import styles
 import { COLORS } from "../styles/colors";
 import { ThemeContext } from "../utils/ThemeContext";
+import SurveySuccessScreen from "../components/screens/dashboard/TakeSurvey/SurveySuccessScreen";
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
 const TasksStack = createStackNavigator();
+const SurveysStack = createStackNavigator();
 const SearchStack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 const SettingsStack = createStackNavigator();
@@ -49,7 +55,6 @@ function HomeStackScreen() {
   );
 }
 
-// Repeat similar stack navigators for other tabs
 function TasksStackScreen() {
   return (
     <TasksStack.Navigator screenOptions={{ headerShown: false }}>
@@ -65,6 +70,26 @@ function TasksStackScreen() {
       />
       <TasksStack.Screen name="Notifications" component={NotificationsScreen} />
     </TasksStack.Navigator>
+  );
+}
+
+function SurveysStackScreen() {
+  return (
+    <SurveysStack.Navigator screenOptions={{ headerShown: false }}>
+      <SurveysStack.Screen
+        name="SurveyScreen"
+        component={TakeSurvey}
+        options={{ headerShown: false }}
+      />
+      <SurveysStack.Screen
+        name="SurveySuccessScreen"
+        component={SurveySuccessScreen}
+      />
+      <SurveysStack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+      />
+    </SurveysStack.Navigator>
   );
 }
 
@@ -144,6 +169,21 @@ export default function DashboardNavigator() {
               return <TaskActiveIcon />;
             } else {
               return isDark ? <TaskDarkIcon /> : <TaskIcon />;
+            }
+          },
+          tabBarActiveTintColor: COLORS.primary,
+        }}
+      />
+      <Tab.Screen
+        name="Take Survey"
+        component={SurveysStackScreen}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => {
+            if (focused) {
+              return <PlusActiveIcon />;
+            } else {
+              return isDark ? <PlusDarkIcon /> : <PlusIcon />;
             }
           },
           tabBarActiveTintColor: COLORS.primary,
