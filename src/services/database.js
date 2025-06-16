@@ -11,15 +11,20 @@ export const initDatabase = async (db) => {
   try {
     if (!db) throw new Error("Database instance is undefined.");
 
-    // Create survey_sessions table with nullable survey_id
+    console.log("Initializing database...");
+
+    // Drop existing tables to ensure clean state
+    await db.runAsync("DROP TABLE IF EXISTS survey_answers");
+    await db.runAsync("DROP TABLE IF EXISTS survey_sessions");
+
+    // Create survey_sessions table with the working schema
     await db.runAsync(`
       CREATE TABLE IF NOT EXISTS survey_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         survey_id TEXT,
-        start_time TEXT NOT NULL,
-        end_time TEXT,
         status TEXT NOT NULL,
-        metadata TEXT
+        created_at TEXT NOT NULL,
+        end_time TEXT
       )
     `);
 
@@ -35,6 +40,20 @@ export const initDatabase = async (db) => {
         FOREIGN KEY (session_id) REFERENCES survey_sessions (id)
       )
     `);
+
+    // Verify table creation
+    const sessionsTableInfo = await db.getAllAsync(
+      "PRAGMA table_info(survey_sessions)"
+    );
+    console.log(
+      "Created survey_sessions table with schema:",
+      sessionsTableInfo
+    );
+
+    const answersTableInfo = await db.getAllAsync(
+      "PRAGMA table_info(survey_answers)"
+    );
+    console.log("Created survey_answers table with schema:", answersTableInfo);
 
     console.log("Database tables initialized successfully");
   } catch (error) {
@@ -52,10 +71,25 @@ export const initDatabase = async (db) => {
 export const createSurveySession = async (db) => {
   try {
     if (!db) throw new Error("Database instance is undefined.");
-    const result = await db.runAsync(
-      "INSERT INTO survey_sessions (status, created_at) VALUES (?, CURRENT_TIMESTAMP)",
-      ["draft"]
+
+    // First check if the table exists and has the right schema
+    const tableInfo = await db.getAllAsync(
+      "PRAGMA table_info(survey_sessions)"
     );
+    console.log("Current table schema:", tableInfo);
+
+    const now = new Date().toISOString();
+    console.log("Creating new survey session with:", {
+      status: "draft",
+      created_at: now,
+    });
+
+    const result = await db.runAsync(
+      "INSERT INTO survey_sessions (status, created_at) VALUES (?, ?)",
+      ["draft", now]
+    );
+
+    console.log("Survey session created with result:", result);
     return result.lastInsertRowId;
   } catch (error) {
     console.error("Error creating survey session:", error);
@@ -121,9 +155,10 @@ export const completeSurveySession = async (
 ) => {
   try {
     if (!db) throw new Error("Database instance is undefined.");
+    const now = new Date().toISOString();
     const result = await db.runAsync(
-      "UPDATE survey_sessions SET status = ?, end_time = CURRENT_TIMESTAMP WHERE id = ?",
-      [status, sessionId]
+      "UPDATE survey_sessions SET status = ?, end_time = ? WHERE id = ?",
+      [status, now, sessionId]
     );
     console.log(
       `Survey session ${sessionId} marked as ${status}. Changes: ${result.changes}`
@@ -314,6 +349,7 @@ export const getDraftSessions = async (db) => {
     const rows = await db.getAllAsync(
       "SELECT id, created_at, end_time FROM survey_sessions WHERE status = 'draft' ORDER BY created_at DESC"
     );
+    console.log(`Found ${rows.length} draft surveys`);
     return rows;
   } catch (error) {
     console.error("Error getting draft sessions:", error);
