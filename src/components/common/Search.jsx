@@ -51,6 +51,7 @@ const Search = ({ onSearch, value, onChangeText, placeholder }) => {
             onChangeText={setInputValue}
             onSubmitEditing={handleSubmit}
             placeholder={placeholder || "Search by ID or title"}
+            placeholderTextColor={theme.colors.secondaryText}
             returnKeyType="search"
           />
           <TouchableOpacity style={styles.refreshBtn} onPress={handleSubmit}>

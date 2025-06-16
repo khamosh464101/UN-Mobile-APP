@@ -46,5 +46,11 @@
     "type": "input_text",
     "question": "What is your full name?",
     "options": []
+  },
+  {
+    "id": 9,
+    "type": "textarea",
+    "question": "Describe your current state.",
+    "options": []
   }
 ]

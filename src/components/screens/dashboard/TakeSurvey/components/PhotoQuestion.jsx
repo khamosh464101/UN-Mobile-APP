@@ -8,11 +8,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import * as FileSystem from "expo-file-system";
 import CameraIcon from "../../../../../assets/icons/camera.svg";
 import CameraFlipIcon from "../../../../../assets/icons/camera-flip.svg";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
 
-const PhotoQuestion = ({ question, value, onChange }) => {
+const PhotoQuestion = ({
+  question,
+  value,
+  onChange,
+  required = false,
+  hint = "",
+}) => {
   const { theme } = useContext(ThemeContext);
   const cameraRef = useRef(null);
 
@@ -23,10 +30,40 @@ const PhotoQuestion = ({ question, value, onChange }) => {
     if (!cameraRef.current) return;
     const options = { quality: 1, base64: true, exif: false };
     const newPhoto = await cameraRef.current.takePictureAsync(options);
-    onChange({ uri: newPhoto.uri, base64: newPhoto.base64 });
+    try {
+      // Create a unique filename with timestamp
+      const fileName = `photo_${Date.now()}.jpg`;
+      const targetPath = `${FileSystem.documentDirectory}survey_images/${fileName}`;
+
+      // Ensure directory exists
+      await FileSystem.makeDirectoryAsync(
+        `${FileSystem.documentDirectory}survey_images/`,
+        {
+          intermediates: true,
+        }
+      );
+
+      // Copy the image to permanent location
+      await FileSystem.copyAsync({
+        from: newPhoto.uri,
+        to: targetPath,
+      });
+
+      // Save only the new uri (permanent location)
+      onChange({ uri: targetPath });
+    } catch (error) {
+      console.error("Error saving image to permanent location", error);
+    }
   };
 
-  const removePhoto = () => {
+  const removePhoto = async () => {
+    if (value?.uri) {
+      try {
+        await FileSystem.deleteAsync(value.uri, { idempotent: true });
+      } catch (e) {
+        console.warn("Failed to delete photo:", e);
+      }
+    }
     onChange(null);
   };
 
@@ -50,21 +87,25 @@ const PhotoQuestion = ({ question, value, onChange }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.question, { color: theme.colors.text }]}>
-        {question}
-      </Text>
+      <View style={styles.questionHeader}>
+        <Text style={[styles.question, { color: theme.colors.text }]}>
+          {question}
+          {required && <Text style={{ color: theme.colors.error }}> *</Text>}
+        </Text>
+        {hint ? (
+          <Text
+            style={[styles.hintText, { color: theme.colors.secondaryText }]}
+          >
+            {hint}
+          </Text>
+        ) : null}
+      </View>
       <View style={styles.cameraContainer}>
-        {value?.base64 ? (
+        {value?.uri ? (
           <>
-            <Image
-              style={styles.preview}
-              source={{ uri: "data:image/jpg;base64," + value.base64 }}
-            />
+            <Image style={styles.preview} source={{ uri: value.uri }} />
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setPhoto(null)}
-              >
+              <TouchableOpacity style={styles.button} onPress={removePhoto}>
                 <CameraIcon />
               </TouchableOpacity>
             </View>
@@ -93,10 +134,17 @@ const PhotoQuestion = ({ question, value, onChange }) => {
 
 const styles = StyleSheet.create({
   container: { marginBottom: 20, flex: 1 },
+  questionHeader: {
+    marginBottom: 10,
+  },
   question: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+  },
+  hintText: {
+    fontSize: 13,
+    marginTop: 5,
+    fontStyle: "italic",
   },
   cameraContainer: {
     flex: 1,

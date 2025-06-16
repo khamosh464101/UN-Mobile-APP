@@ -2,13 +2,29 @@ import React, { useContext } from "react";
 import { StyleSheet, View, Text, TextInput } from "react-native";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
 
-const IntegerQuestion = ({ question, value, onChange }) => {
+const IntegerQuestion = ({
+  question,
+  value,
+  onChange,
+  required = false,
+  hint = "",
+}) => {
   const { theme } = useContext(ThemeContext);
   return (
     <View style={styles.container}>
-      <Text style={[styles.question, { color: theme.colors.text }]}>
-        {question}
-      </Text>
+      <View style={styles.questionHeader}>
+        <Text style={[styles.question, { color: theme.colors.text }]}>
+          {question}
+          {required && <Text style={{ color: theme.colors.error }}> *</Text>}
+        </Text>
+        {hint ? (
+          <Text
+            style={[styles.hintText, { color: theme.colors.secondaryText }]}
+          >
+            {hint}
+          </Text>
+        ) : null}
+      </View>
       <TextInput
         style={[
           styles.input,
@@ -34,10 +50,17 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 20,
   },
+  questionHeader: {
+    marginBottom: 10,
+  },
   question: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+  },
+  hintText: {
+    fontSize: 13,
+    marginTop: 5,
+    fontStyle: "italic",
   },
   input: {
     height: 50,

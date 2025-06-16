@@ -10,7 +10,10 @@ import NotificationsScreen from "../components/screens/dashboard/NotificationsSc
 import TasksScreen from "../components/screens/dashboard/TasksScreen/TasksScreen";
 import TaskScreen from "../components/screens/dashboard/TasksScreen/TaskScreen";
 import SettingsScreen from "../components/screens/dashboard/SettingsScreen/SettingsScreen";
-import TakeSurvey from "../components/screens/dashboard/TakeSurvey/TakeSurvey";
+import TakeSurveyScreen from "../components/screens/dashboard/TakeSurvey/TakeSurveyScreen";
+import SurveySuccessScreen from "../components/screens/dashboard/TakeSurvey/SurveySuccessScreen";
+import SurveysScreen from "../components/screens/dashboard/TakeSurvey/SurveysScreen";
+import FinalizedSurveysScreen from "../components/screens/dashboard/FinalizedSurveys/FinalizedSurveysScreen";
 // import TaskStackNavigator from "./TaskStackNavigator";
 
 // Import icons
@@ -36,7 +39,8 @@ import PlusActiveIcon from "../assets/icons/plus-active.svg";
 // Import styles
 import { COLORS } from "../styles/colors";
 import { ThemeContext } from "../utils/ThemeContext";
-import SurveySuccessScreen from "../components/screens/dashboard/TakeSurvey/SurveySuccessScreen";
+import SurveyDetailsScreen from "../components/screens/dashboard/SurveyDetails/SurveyDetailsScreen";
+import DraftSurveysScreen from "../components/screens/dashboard/DraftSurveys/DraftSurveysScreen";
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
@@ -77,8 +81,28 @@ function SurveysStackScreen() {
   return (
     <SurveysStack.Navigator screenOptions={{ headerShown: false }}>
       <SurveysStack.Screen
-        name="SurveyScreen"
-        component={TakeSurvey}
+        name="SurveysScreen"
+        component={SurveysScreen}
+        options={{ headerShown: false }}
+      />
+      <SurveysStack.Screen
+        name="FinalizeSurveyScreen"
+        component={FinalizedSurveysScreen}
+        options={{ headerShown: false }}
+      />
+      <SurveysStack.Screen
+        name="SurveyDetailsScreen"
+        component={SurveyDetailsScreen}
+        options={{ headerShown: false }}
+      />
+      <SurveysStack.Screen
+        name="DraftSurveysScreen"
+        component={DraftSurveysScreen}
+        options={{ headerShown: false }}
+      />
+      <SurveysStack.Screen
+        name="TakeSurveyScreen"
+        component={TakeSurveyScreen}
         options={{ headerShown: false }}
       />
       <SurveysStack.Screen
@@ -175,7 +199,7 @@ export default function DashboardNavigator() {
         }}
       />
       <Tab.Screen
-        name="Take Survey"
+        name="Surveys"
         component={SurveysStackScreen}
         options={{
           headerShown: false,

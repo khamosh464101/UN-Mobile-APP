@@ -3,6 +3,10 @@
     "name": "UN-Habitat",
     "slug": "UN-Habitat",
     "version": "1.0.0",
+    "extra": {
+      "API_URL": "https://eu.kobotoolbox.org/api/v2/assets/a36vAYGb2v3rvengRLFM7o/deployment/",
+      "PUBLIC_API_KEY": "37505e43c62161e95c146151ad8b09810e6d3454"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -35,7 +39,8 @@
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
-      ]
+      ],
+      "expo-sqlite"
     ]
   }
 }

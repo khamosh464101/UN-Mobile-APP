@@ -1,16 +1,39 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
+import { ThemeContext } from "../../../../../utils/ThemeContext";
 
-const TextQuestion = ({ question, value, onChange }) => {
+const TextQuestion = ({
+  question,
+  value,
+  onChange,
+  required = false,
+  hint = "",
+}) => {
+  const { theme } = useContext(ThemeContext);
   return (
     <View style={styles.container}>
-      <Text style={styles.question}>{question}</Text>
+      <View style={styles.questionHeader}>
+        <Text style={[styles.question, { color: theme.colors.text }]}>
+          {question}
+          {required && <Text style={{ color: theme.colors.error }}> *</Text>}
+        </Text>
+        {hint ? (
+          <Text
+            style={[styles.hintText, { color: theme.colors.secondaryText }]}
+          >
+            {hint}
+          </Text>
+        ) : null}
+      </View>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          { borderColor: theme.colors.lightBlack, color: theme.colors.text },
+        ]}
         value={value || ""}
         onChangeText={onChange}
         placeholder="Enter your answer"
-        placeholderTextColor="#888"
+        placeholderTextColor={theme.colors.secondaryText}
       />
     </View>
   );
@@ -20,14 +43,20 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 20,
   },
+  questionHeader: {
+    marginBottom: 10,
+  },
   question: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+  },
+  hintText: {
+    fontSize: 13,
+    marginTop: 5,
+    fontStyle: "italic",
   },
   input: {
     height: 40,
-    borderColor: "#4B0082",
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,

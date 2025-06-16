@@ -1,16 +1,9 @@
 import React, { useContext } from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
 
-const TextareaQuestion = ({
-  question,
-  value,
-  onChange,
-  required = false,
-  hint = "",
-}) => {
+const Note = ({ question, value, onChange, required = false, hint = "" }) => {
   const { theme } = useContext(ThemeContext);
-
   return (
     <View style={styles.container}>
       <View style={styles.questionHeader}>
@@ -26,26 +19,11 @@ const TextareaQuestion = ({
           </Text>
         ) : null}
       </View>
-      <TextInput
-        style={[
-          styles.textarea,
-          {
-            borderColor: theme.colors.lightBlack,
-            backgroundColor: theme.colors.lightBlack,
-            color: theme.colors.text,
-          },
-        ]}
-        value={value}
-        onChangeText={onChange}
-        multiline
-        numberOfLines={4}
-        placeholder="Enter your answer..."
-        placeholderTextColor={theme.colors.secondaryText}
-        textAlignVertical="top"
-      />
     </View>
   );
 };
+
+export default Note;
 
 const styles = StyleSheet.create({
   container: {
@@ -63,13 +41,4 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontStyle: "italic",
   },
-  textarea: {
-    height: 180,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 14,
-  },
 });
-
-export default TextareaQuestion;

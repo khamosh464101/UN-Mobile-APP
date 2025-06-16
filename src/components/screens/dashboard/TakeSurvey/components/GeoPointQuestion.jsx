@@ -13,7 +13,13 @@ import { ThemeContext } from "../../../../../utils/ThemeContext";
 import MapIcon from "../../../../../assets/icons/profile/map.svg";
 import MapDarkIcon from "../../../../../assets/icons/profile/map-dark.svg";
 
-const GeoPointQuestion = ({ question, value, onChange }) => {
+const GeoPointQuestion = ({
+  question,
+  value,
+  onChange,
+  required = false,
+  hint = "",
+}) => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme.dark;
   const [location, setLocation] = useState(value || null);
@@ -72,9 +78,19 @@ const GeoPointQuestion = ({ question, value, onChange }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.question, { color: theme.colors.text }]}>
-        {question}
-      </Text>
+      <View style={styles.questionHeader}>
+        <Text style={[styles.question, { color: theme.colors.text }]}>
+          {question}
+          {required && <Text style={{ color: theme.colors.error }}> *</Text>}
+        </Text>
+        {hint ? (
+          <Text
+            style={[styles.hintText, { color: theme.colors.secondaryText }]}
+          >
+            {hint}
+          </Text>
+        ) : null}
+      </View>
 
       {loading && <ActivityIndicator size="large" />}
       {errorMsg && <Text style={styles.error}>{errorMsg}</Text>}
@@ -105,12 +121,12 @@ const GeoPointQuestion = ({ question, value, onChange }) => {
             <Text style={{ color: theme.colors.text, marginTop: 12 }}>
               Latitude: {location.latitude.toFixed(6)}
             </Text>
-            <Text style={{ color: theme.colors.text }}>
+            <Text style={{ color: theme.colors.text, marginBottom: 12 }}>
               Longitude: {location.longitude.toFixed(6)}
             </Text>
           </>
         )}
-        {address !== "" && (
+        {/* {address !== "" && (
           <View style={styles.addressWrapper}>
             {isDark ? <MapDarkIcon /> : <MapIcon />}
             <Text
@@ -120,7 +136,7 @@ const GeoPointQuestion = ({ question, value, onChange }) => {
               {address}
             </Text>
           </View>
-        )}
+        )} */}
       </View>
       {/* <Button
         title="Current Location"
@@ -145,10 +161,17 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 20,
   },
+  questionHeader: {
+    marginBottom: 12,
+  },
   question: {
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 12,
+  },
+  hintText: {
+    fontSize: 13,
+    marginTop: 5,
+    fontStyle: "italic",
   },
   error: {
     color: "red",

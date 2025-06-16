@@ -16,6 +16,8 @@ import DashboardNavigator from "./src/navigation/DashboardNavigator";
 import { SearchProvider } from "./src/utils/SearchContext";
 import { useContext } from "react";
 import { ThemeProvider, ThemeContext } from "./src/utils/ThemeContext";
+import { SQLiteProvider } from "expo-sqlite";
+import { initDatabase } from "./src/services/database";
 
 const Stack = createStackNavigator();
 
@@ -49,8 +51,10 @@ function MainApp() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <MainApp />
-    </ThemeProvider>
+    <SQLiteProvider databaseName="survey.db" onInit={initDatabase}>
+      <ThemeProvider>
+        <MainApp />
+      </ThemeProvider>
+    </SQLiteProvider>
   );
 }
