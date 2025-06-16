@@ -284,14 +284,6 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
     return typeMap[koboType] || koboType;
   };
 
-  if (loading) {
-    return (
-      <View style={[commonStyles.screenWrapper, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
-
   if (!surveyData || !surveyData.questions) {
     console.log("No survey data available:", surveyData);
     return (
@@ -301,6 +293,7 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
           { backgroundColor: theme.colors.background },
         ]}
       >
+        <Topbar />
         <View style={styles.content}>
           <Text style={[styles.errorText, { color: theme.colors.text }]}>
             No survey data available
@@ -323,22 +316,31 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
       ]}
     >
       <Topbar />
-      <ScrollView style={styles.content}>
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>
-            Survey #{sessionId}
-          </Text>
-          <Text style={[styles.date, { color: theme.colors.secondaryText }]}>
-            Finalized:{" "}
-            {new Date(surveyData?.session.end_time).toLocaleDateString()}
-          </Text>
+
+      {loading ? (
+        <View style={[commonStyles.screenWrapper, styles.loadingContainer]}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
         </View>
-        <View style={styles.answersContainer}>
-          {Object.entries(answers).map(([questionId, answerData]) =>
-            renderAnswer(questionId, answerData)
-          )}
+      ) : (
+        <View style={{ flex: 1 }}>
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: theme.colors.text }]}>
+              Survey #{sessionId}
+            </Text>
+            <Text style={[styles.date, { color: theme.colors.secondaryText }]}>
+              Finalized:{" "}
+              {new Date(surveyData?.session.end_time).toLocaleDateString()}
+            </Text>
+          </View>
+          <ScrollView style={styles.content}>
+            <View style={styles.answersContainer}>
+              {Object.entries(answers).map(([questionId, answerData]) =>
+                renderAnswer(questionId, answerData)
+              )}
+            </View>
+          </ScrollView>
         </View>
-      </ScrollView>
+      )}
     </View>
   );
 };

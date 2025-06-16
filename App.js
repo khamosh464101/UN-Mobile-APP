@@ -1,8 +1,8 @@
-import * as React from "react";
+import React from "react";
 import "react-native-gesture-handler";
 
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 
 // Auth Screens
@@ -18,8 +18,10 @@ import { useContext } from "react";
 import { ThemeProvider, ThemeContext } from "./src/utils/ThemeContext";
 import { SQLiteProvider } from "expo-sqlite";
 import { initDatabase } from "./src/services/database";
+import NetworkWrapper from "./src/components/common/NetworkWrapper";
+import NetworkStatus from "./src/components/common/NetworkStatus";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 function MainApp() {
   const { theme } = useContext(ThemeContext);
@@ -28,22 +30,25 @@ function MainApp() {
     <SearchProvider>
       <NavigationContainer>
         <StatusBar style={theme.dark ? "light" : "dark"} />
-        <Stack.Navigator
-          screenOptions={{ headerShown: false }}
-          initialRouteName="Login"
-        >
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="OTP" component={OTPVerificationScreen} />
-          <Stack.Screen
-            name="ForgotPassword"
-            component={ForgotPasswordScreen}
-          />
-          <Stack.Screen
-            name="Dashboard"
-            theme={theme}
-            component={DashboardNavigator}
-          />
-        </Stack.Navigator>
+        <NetworkStatus />
+        <NetworkWrapper>
+          <Stack.Navigator
+            screenOptions={{ headerShown: false }}
+            initialRouteName="Login"
+          >
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="OTP" component={OTPVerificationScreen} />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+            />
+            <Stack.Screen
+              name="Dashboard"
+              theme={theme}
+              component={DashboardNavigator}
+            />
+          </Stack.Navigator>
+        </NetworkWrapper>
       </NavigationContainer>
     </SearchProvider>
   );
@@ -51,10 +56,10 @@ function MainApp() {
 
 export default function App() {
   return (
-    <SQLiteProvider databaseName="survey.db" onInit={initDatabase}>
-      <ThemeProvider>
+    <ThemeProvider>
+      <SQLiteProvider databaseName="survey.db" onInit={initDatabase}>
         <MainApp />
-      </ThemeProvider>
-    </SQLiteProvider>
+      </SQLiteProvider>
+    </ThemeProvider>
   );
 }
