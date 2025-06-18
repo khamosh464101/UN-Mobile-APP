@@ -17,6 +17,8 @@ const CheckboxQuestion = ({ question, options, value = [], onChange }) => {
       onChange([...value, option]);
     }
   };
+  console.log("Options:", options);
+  console.log("Question:", question);
   return (
     <ScrollView style={styles.container}>
       <Text style={[styles.question, { color: theme.colors.text }]}>
@@ -41,7 +43,7 @@ const CheckboxQuestion = ({ question, options, value = [], onChange }) => {
             )}
           </View>
           <Text style={[styles.optionText, { color: theme.colors.text }]}>
-            {option}
+            {option.label}
           </Text>
         </TouchableOpacity>
       ))}

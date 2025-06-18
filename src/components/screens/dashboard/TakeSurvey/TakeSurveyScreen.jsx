@@ -486,12 +486,12 @@ const TakeSurveyScreen = ({ route, navigation }) => {
         setSessionId(storedSessionId);
       }
 
-      console.log("Saving answer:", {
-        questionId,
-        value,
-        type,
-        sessionId: storedSessionId,
-      });
+      // console.log("Saving answer:", {
+      //   questionId,
+      //   value,
+      //   type,
+      //   sessionId: storedSessionId,
+      // });
 
       // Update local state
       setAnswers((prev) => ({
@@ -501,19 +501,19 @@ const TakeSurveyScreen = ({ route, navigation }) => {
 
       // Save to SQLite
       await db.saveAnswer(sqlite, storedSessionId, questionId, value, type);
-      console.log("Answer saved successfully");
+      // console.log("Answer saved successfully");
 
       // Save draft if needed
-      if (draftId) {
-        const draftData = {
-          answers: { ...answers, [questionId]: value },
-          currentIndex,
-        };
-        await AsyncStorage.setItem(
-          `draft_${draftId}`,
-          JSON.stringify(draftData)
-        );
-      }
+      // if (draftId) {
+      //   const draftData = {
+      //     answers: { ...answers, [questionId]: value },
+      //     currentIndex,
+      //   };
+      //   await AsyncStorage.setItem(
+      //     `draft_${draftId}`,
+      //     JSON.stringify(draftData)
+      //   );
+      // }
     } catch (err) {
       console.error("Error saving answer:", err);
       Alert.alert("Error", "Failed to save your answer. Please try again.");
@@ -653,7 +653,7 @@ const TakeSurveyScreen = ({ route, navigation }) => {
       }
 
       console.log("Finalizing survey with sessionId:", storedSessionId);
-      console.log("Current answers:", answers);
+      // console.log("Current answers:", answers);
 
       // Update the survey session status to finalized
       await db.completeSurveySession(sqlite, storedSessionId, "finalized");
@@ -697,7 +697,7 @@ const TakeSurveyScreen = ({ route, navigation }) => {
       }
 
       console.log("Saving survey as draft with sessionId:", storedSessionId);
-      console.log("Current answers:", answers);
+      // console.log("Current answers:", answers);
 
       // Update the survey session status to draft
       await db.completeSurveySession(sqlite, storedSessionId, "draft");

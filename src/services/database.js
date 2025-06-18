@@ -78,6 +78,12 @@ export const createSurveySession = async (db) => {
     );
     console.log("Current table schema:", tableInfo);
 
+    // Check if we have any existing sessions
+    const existingSessions = await db.getAllAsync(
+      "SELECT COUNT(*) as count FROM survey_sessions"
+    );
+    console.log("Existing sessions count:", existingSessions[0].count);
+
     const now = new Date().toISOString();
     console.log("Creating new survey session with:", {
       status: "draft",
@@ -90,6 +96,14 @@ export const createSurveySession = async (db) => {
     );
 
     console.log("Survey session created with result:", result);
+
+    // Verify the session was created
+    const newSession = await db.getAllAsync(
+      "SELECT * FROM survey_sessions WHERE id = ?",
+      [result.lastInsertRowId]
+    );
+    console.log("Verified new session:", newSession[0]);
+
     return result.lastInsertRowId;
   } catch (error) {
     console.error("Error creating survey session:", error);
@@ -108,12 +122,56 @@ export const createSurveySession = async (db) => {
 export const saveAnswer = async (db, sessionId, questionId, value, type) => {
   try {
     if (!db) throw new Error("Database instance is undefined.");
+    const now = new Date().toISOString();
 
-    const createdAt = new Date().toISOString();
+    // Handle different types of answers
+    let answerValue = value;
+
+    // Handle photo type answers
+    if (type === "input_photo") {
+      if (Array.isArray(value)) {
+        // Handle array of photos
+        if (value.length > 0) {
+          // If array is empty, save as empty array string
+          answerValue = JSON.stringify(value.map((photo) => photo.uri));
+          // answerValue = "[]";
+        } else {
+          // Only map if we have photos
+          console.log("Skipping save of empty photo array");
+          return;
+        }
+      } else if (typeof value === "object" && value.uri) {
+        // Handle single photo
+        answerValue = value.uri;
+      } else {
+        // Handle null/undefined case
+        // answerValue = null;
+        console.log("Skipping save of null photo value");
+        return;
+      }
+    }
+
+    // Handle date type answers
+    if (type === "input_date" && value instanceof Date) {
+      answerValue = value.toISOString();
+    }
+
+    // Handle text and number inputs - ensure they're strings
+    if (type === "input_text" || type === "input_number") {
+      answerValue = value ? String(value) : null;
+    }
+
+    console.log("Saving answer with processed value:", {
+      questionId,
+      sessionId,
+      type,
+      value: answerValue,
+    });
 
     await db.runAsync(
-      "INSERT INTO survey_answers (session_id, question_id, value, type, created_at) VALUES (?, ?, ?, ?, ?)",
-      [sessionId, questionId, value, type, createdAt]
+      `INSERT INTO survey_answers (session_id, question_id, value, type, created_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      [sessionId, questionId, answerValue, type, now]
     );
 
     console.log("Answer saved successfully");
@@ -155,11 +213,33 @@ export const completeSurveySession = async (
 ) => {
   try {
     if (!db) throw new Error("Database instance is undefined.");
+
+    // First verify the session exists
+    const existingSession = await db.getAllAsync(
+      "SELECT * FROM survey_sessions WHERE id = ?",
+      [sessionId]
+    );
+    console.log("Existing session before update:", existingSession[0]);
+
     const now = new Date().toISOString();
+    console.log("Updating session with:", {
+      sessionId,
+      status,
+      end_time: now,
+    });
+
     const result = await db.runAsync(
       "UPDATE survey_sessions SET status = ?, end_time = ? WHERE id = ?",
       [status, now, sessionId]
     );
+
+    // Verify the update
+    const updatedSession = await db.getAllAsync(
+      "SELECT * FROM survey_sessions WHERE id = ?",
+      [sessionId]
+    );
+    console.log("Updated session:", updatedSession[0]);
+
     console.log(
       `Survey session ${sessionId} marked as ${status}. Changes: ${result.changes}`
     );
