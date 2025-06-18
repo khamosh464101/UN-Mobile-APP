@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { ThemeContext } from "../../../../utils/ThemeContext";
@@ -135,11 +136,113 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
     console.log("Rendering answer:", { question, answerData });
 
     const displayValue = (() => {
-      if (question.type === "radio" || question.type === "checkbox") {
+      if (question.type === "radio") {
         const option = question.options?.find(
           (opt) => opt.value === answerData.value
         );
         return option ? option.label : answerData.value;
+      }
+      if (question.type === "checkbox") {
+        try {
+          let values = answerData.value;
+
+          // If it's a string, try to parse the custom format
+          if (typeof values === "string") {
+            // Remove the outer brackets and split by closing brace
+            const items = values.slice(1, -1).split("},");
+
+            // Parse each item
+            values = items.map((item) => {
+              // Clean up the item string
+              const cleanItem = item.replace("{", "").replace("}", "").trim();
+
+              // Split into key-value pairs
+              const pairs = cleanItem.split(",");
+
+              // Create object from pairs
+              const obj = {};
+              pairs.forEach((pair) => {
+                const [key, value] = pair.split("=").map((s) => s.trim());
+                obj[key] = value;
+              });
+
+              return obj;
+            });
+          }
+
+          // Ensure it's an array
+          values = Array.isArray(values) ? values : [values];
+
+          // Extract labels from the objects
+          const selectedOptions = values
+            .map((item) => {
+              // Handle both object format and direct value
+              const value = typeof item === "object" ? item.value : item;
+              const option = question.options?.find(
+                (opt) => opt.value === value
+              );
+              return option ? option.label : item.label || value;
+            })
+            .filter(Boolean);
+
+          return selectedOptions.join(", ");
+        } catch (error) {
+          console.error("Error processing checkbox values:", error);
+          return answerData.value;
+        }
+      }
+      if (question.type === "input_photo") {
+        try {
+          let photos = answerData.value;
+
+          // Check if it's a JSON string array
+          if (typeof photos === "string" && photos.startsWith("[")) {
+            photos = JSON.parse(photos);
+          }
+
+          // Ensure it's an array
+          photos = Array.isArray(photos) ? photos : [photos];
+
+          console.log("Processed photos:", photos);
+
+          // If it's a single photo, show it full width
+          if (photos.length === 1) {
+            return (
+              <View style={styles.singleImageContainer}>
+                <Image
+                  source={{ uri: photos[0] }}
+                  style={styles.singleImage}
+                  resizeMode="contain"
+                />
+              </View>
+            );
+          }
+
+          // For multiple photos, show them in a grid
+          return (
+            <View style={styles.multipleImageContainer}>
+              {photos.map((photo, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: photo }}
+                  style={styles.multipleImage}
+                  resizeMode="cover"
+                />
+              ))}
+            </View>
+          );
+        } catch (error) {
+          console.error("Error processing photos:", error);
+          return (
+            <View style={styles.singleImageContainer}>
+              <Image
+                source={{ uri: answerData.value }}
+                style={styles.singleImage}
+                resizeMode="contain"
+              />
+            </View>
+          );
+        }
       }
       return answerData.value;
     })();
@@ -149,9 +252,13 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
         <Text style={[styles.question, { color: theme.colors.text }]}>
           {question.question}
         </Text>
-        <Text style={[styles.answer, { color: theme.colors.secondaryText }]}>
-          {displayValue}
-        </Text>
+        {question.type === "input_photo" ? (
+          displayValue
+        ) : (
+          <Text style={[styles.answer, { color: theme.colors.secondaryText }]}>
+            {displayValue}
+          </Text>
+        )}
       </View>
     );
   };
@@ -384,6 +491,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginTop: 20,
+  },
+  imageContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 8,
+  },
+  answerImage: {
+    flex: 1,
+    width: "100%",
+    borderRadius: 8,
+  },
+  singleImageContainer: {
+    width: "100%",
+    marginTop: 8,
+  },
+  singleImage: {
+    width: "100%",
+    height: 300,
+    borderRadius: 8,
+  },
+  multipleImageContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 8,
+  },
+  multipleImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
   },
 });
 
