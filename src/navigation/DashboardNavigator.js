@@ -14,6 +14,7 @@ import TakeSurveyScreen from "../components/screens/dashboard/TakeSurvey/TakeSur
 import SurveySuccessScreen from "../components/screens/dashboard/TakeSurvey/SurveySuccessScreen";
 import SurveysScreen from "../components/screens/dashboard/TakeSurvey/SurveysScreen";
 import FinalizedSurveysScreen from "../components/screens/dashboard/FinalizedSurveys/FinalizedSurveysScreen";
+import SubmittedSurveysScreen from "../components/screens/dashboard/SubmittedSurveys/SubmittedSurveysScreen";
 // import TaskStackNavigator from "./TaskStackNavigator";
 
 // Import icons
@@ -98,6 +99,11 @@ function SurveysStackScreen() {
       <SurveysStack.Screen
         name="DraftSurveysScreen"
         component={DraftSurveysScreen}
+        options={{ headerShown: false }}
+      />
+      <SurveysStack.Screen
+        name="SubmittedSurveysScreen"
+        component={SubmittedSurveysScreen}
         options={{ headerShown: false }}
       />
       <SurveysStack.Screen

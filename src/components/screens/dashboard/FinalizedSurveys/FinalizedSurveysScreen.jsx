@@ -72,7 +72,9 @@ const FinalizedSurveysScreen = () => {
             <Text style={styles.statusLabel}>Finalized</Text>
           </View>
         </View>
-        <Text style={[styles.surveyDate, { color: theme.colors.text }]}>
+        <Text
+          style={[styles.surveyDate, { color: theme.colors.secondaryText }]}
+        >
           Finalized on {formatDate(item.created_at)}
         </Text>
       </View>

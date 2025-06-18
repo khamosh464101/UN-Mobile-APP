@@ -7,6 +7,7 @@ import TabSwitcher from "../../../common/TabSwitcher";
 import DraftSurveysScreen from "../DraftSurveys/DraftSurveysScreen";
 import FinalizedSurveysScreen from "../FinalizedSurveys/FinalizedSurveysScreen";
 import { useNavigation } from "@react-navigation/native";
+import SubmittedSurveysScreen from "../SubmittedSurveys/SubmittedSurveysScreen";
 
 const SurveysScreen = () => {
   const { theme } = useContext(ThemeContext);
@@ -26,13 +27,7 @@ const SurveysScreen = () => {
       case "drafts":
         return <DraftSurveysScreen />;
       case "submitted":
-        return (
-          <View style={styles.submittedContainer}>
-            <Text style={[styles.submittedText, { color: theme.colors.text }]}>
-              Submitted Surveys
-            </Text>
-          </View>
-        );
+        return <SubmittedSurveysScreen />;
       default:
         return <FinalizedSurveysScreen />;
     }

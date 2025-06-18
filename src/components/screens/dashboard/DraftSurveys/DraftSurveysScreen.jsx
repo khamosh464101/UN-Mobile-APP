@@ -136,7 +136,9 @@ const DraftSurveysScreen = () => {
             <Text style={styles.statusLabel}>Draft</Text>
           </View>
         </View>
-        <Text style={[styles.surveyDate, { color: theme.colors.text }]}>
+        <Text
+          style={[styles.surveyDate, { color: theme.colors.secondaryText }]}
+        >
           Saved on {formatDate(item.created_at)}
         </Text>
       </View>

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  TouchableOpacity,
 } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { ThemeContext } from "../../../../utils/ThemeContext";
@@ -28,79 +29,76 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
   const apiURL = Constants.expoConfig.extra.API_URL;
   const apiToken = Constants.expoConfig.extra.PUBLIC_API_KEY;
 
-  useEffect(() => {
-    const loadSurveyDetails = async () => {
-      try {
-        if (!sqlite) {
-          throw new Error("SQLite context not available");
-        }
+  const loadSurveyDetails = async () => {
+    try {
+      if (!sqlite) {
+        throw new Error("SQLite context not available");
+      }
 
-        // Get session details
-        const session = await db.getSurveySession(sqlite, sessionId);
-        console.log("Session details:", session);
+      // Get session details
+      const session = await db.getSurveySession(sqlite, sessionId);
+      console.log("Session details:", session);
 
-        // Get answers for this session
-        const getSessionAnswers = async () => {
-          try {
-            if (!sqlite) {
-              throw new Error("SQLite context not available");
-            }
-
-            const answers = await db.getSessionAnswers(sqlite, sessionId);
-            console.log("Raw session answers:", answers);
-
-            // Transform answers into a more usable format
-            const transformedAnswers = answers.reduce((acc, answer) => {
-              acc[answer.question_id] = {
-                value: answer.value,
-                type: answer.type,
-              };
-              return acc;
-            }, {});
-
-            console.log("Transformed answers:", transformedAnswers);
-            setAnswers(transformedAnswers);
-          } catch (error) {
-            console.error("Error getting session answers:", error);
-            Alert.alert(
-              "Error",
-              "Failed to load survey answers. Please try again."
-            );
-          }
-        };
-
-        // Fetch survey questions from API
+      // Get answers for this session
+      const getSessionAnswers = async () => {
         try {
-          const response = await axios.get(apiURL, {
-            headers: {
-              Authorization: `Token ${apiToken}`,
-              Accept: "application/json",
-            },
-          });
+          if (!sqlite) {
+            throw new Error("SQLite context not available");
+          }
 
-          const transformedQuestions = transformKoBoData(response.data);
-          console.log("Transformed questions:", transformedQuestions);
-          setSurveyData({ session, questions: transformedQuestions });
-          await getSessionAnswers();
-        } catch (err) {
-          console.error("Error fetching survey:", err);
+          const answers = await db.getSessionAnswers(sqlite, sessionId);
+          console.log("Raw session answers:", answers);
+
+          // Transform answers into a more usable format
+          const transformedAnswers = answers.reduce((acc, answer) => {
+            acc[answer.question_id] = {
+              value: answer.value,
+              type: answer.type,
+            };
+            return acc;
+          }, {});
+
+          console.log("Transformed answers:", transformedAnswers);
+          setAnswers(transformedAnswers);
+        } catch (error) {
+          console.error("Error getting session answers:", error);
           Alert.alert(
             "Error",
-            "Failed to load survey questions. Please try again."
+            "Failed to load survey answers. Please try again."
           );
         }
+      };
 
-        setLoading(false);
-      } catch (error) {
-        console.error("Error loading survey details:", error);
+      // Fetch survey questions from API
+      try {
+        const response = await axios.get(apiURL, {
+          headers: {
+            Authorization: `Token ${apiToken}`,
+            Accept: "application/json",
+          },
+        });
+
+        const transformedQuestions = transformKoBoData(response.data);
+        console.log("Transformed questions:", transformedQuestions);
+        setSurveyData({ session, questions: transformedQuestions });
+        await getSessionAnswers();
+      } catch (err) {
+        console.error("Error fetching survey:", err);
         Alert.alert(
           "Error",
-          "Failed to load survey details. Please try again."
+          "Failed to load survey questions. Please try again."
         );
-        setLoading(false);
       }
-    };
 
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading survey details:", error);
+      Alert.alert("Error", "Failed to load survey details. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadSurveyDetails();
   }, [sqlite, sessionId]);
 
@@ -391,6 +389,29 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
     return typeMap[koboType] || koboType;
   };
 
+  const handleSubmitSurvey = async () => {
+    try {
+      if (!sqlite) {
+        throw new Error("SQLite context not available");
+      }
+
+      // Update the survey session status to submitted
+      await db.completeSurveySession(sqlite, sessionId, "submitted");
+
+      // Get the onTabChange function from route params
+      const onTabChange = route.params?.onTabChange;
+      if (onTabChange) {
+        onTabChange("submitted");
+      }
+
+      // Navigate back to SurveysScreen
+      navigation.navigate("SurveysScreen");
+    } catch (error) {
+      console.error("Error submitting survey:", error);
+      Alert.alert("Error", "Failed to submit survey. Please try again.");
+    }
+  };
+
   if (!surveyData || !surveyData.questions) {
     console.log("No survey data available:", surveyData);
     return (
@@ -439,6 +460,19 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
               {new Date(surveyData?.session.end_time).toLocaleDateString()}
             </Text>
           </View>
+
+          {surveyData?.session.status === "finalized" && (
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                { backgroundColor: theme.colors.primary },
+              ]}
+              onPress={handleSubmitSurvey}
+            >
+              <Text style={styles.submitButtonText}>Submit Survey</Text>
+            </TouchableOpacity>
+          )}
+
           <ScrollView style={styles.content}>
             <View style={styles.answersContainer}>
               {Object.entries(answers).map(([questionId, answerData]) =>
@@ -522,6 +556,18 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 8,
+  },
+  submitButton: {
+    marginHorizontal: 16,
+    marginVertical: 12,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  submitButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
