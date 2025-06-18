@@ -1,6 +1,7 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import { StyleSheet, View, Text, TextInput } from "react-native";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
+import debounce from "lodash/debounce";
 
 const IntegerQuestion = ({
   question,
@@ -10,6 +11,27 @@ const IntegerQuestion = ({
   hint = "",
 }) => {
   const { theme } = useContext(ThemeContext);
+  const [localValue, setLocalValue] = useState(value?.toString() || "");
+
+  // Update local value when prop value changes
+  useEffect(() => {
+    setLocalValue(value?.toString() || "");
+  }, [value]);
+
+  // Create a debounced version of onChange
+  const debouncedOnChange = useCallback(
+    debounce((text) => {
+      onChange(text);
+    }, 500),
+    [onChange]
+  );
+
+  const handleChangeText = (text) => {
+    const numeric = text.replace(/[^0-9]/g, "");
+    setLocalValue(numeric);
+    debouncedOnChange(numeric);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.questionHeader}>
@@ -31,11 +53,8 @@ const IntegerQuestion = ({
           { borderColor: theme.colors.lightBlack, color: theme.colors.text },
         ]}
         keyboardType="numeric"
-        value={value?.toString() || ""}
-        onChangeText={(text) => {
-          const numeric = text.replace(/[^0-9]/g, "");
-          onChange(numeric);
-        }}
+        value={localValue}
+        onChangeText={handleChangeText}
         placeholder="Enter a number"
         placeholderTextColor={theme.colors.secondaryText}
         maxLength={10}
