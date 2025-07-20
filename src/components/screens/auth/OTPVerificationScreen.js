@@ -20,6 +20,7 @@ import { Button } from "../../common/Button";
 import { commonStyles } from "../../../styles/commonStyles";
 import { validateOTP } from "../../../utils/validation";
 import { COLORS } from "../../../styles/colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function OTPVerificationScreen({ navigation }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -28,6 +29,7 @@ export default function OTPVerificationScreen({ navigation }) {
   const [resendLoading, setResendLoading] = useState(false);
   const [otpError, setOtpError] = useState("");
 
+  console.log(AsyncStorage.getItem("token"));
   const handleChange = (text, index) => {
     if (/^\d$/.test(text)) {
       const newOtp = [...otp];

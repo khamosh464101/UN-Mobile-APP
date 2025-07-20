@@ -598,15 +598,15 @@ const TakeSurveyScreen = ({ route, navigation }) => {
 
     // If we reached the end, show completion alert
     Alert.alert(
-      "Complete Survey",
-      "You've reached the end of the survey. Would you like to complete it now?",
+      "Finalize Survey",
+      "You've reached the end of the survey. Would you like to finalize it now?",
       [
         {
           text: "Continue Editing",
           style: "cancel",
         },
         {
-          text: "Complete Survey",
+          text: "Finalize Survey",
           onPress: handleComplete,
         },
       ]

@@ -20,6 +20,8 @@ import { Button } from "../../common/Button";
 import { commonStyles } from "../../../styles/commonStyles";
 import { validateEmail, validatePassword } from "../../../utils/validation";
 import { COLORS } from "../../../styles/colors";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -30,7 +32,7 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const passwordRef = useRef(null);
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password);
 
@@ -38,20 +40,22 @@ export default function LoginScreen({ navigation }) {
     setPasswordError(passwordValidation);
 
     if (!emailValidation && !passwordValidation) {
-      if (email !== "atiqullah@momtaz.ws") {
-        setEmailError("Email does not match our records.");
-        return;
-      }
-      if (password !== "atiq12atiq") {
-        setPasswordError("Password does not match our records.");
-        return;
-      }
-
       setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
+      try {
+        const response = await axios.post("https://un.momtazhost.com/login", {
+          email: email,
+          password: password,
+        });
+
+        // const { data } = response;
+
+        console.log("Response:", response);
+        // await AsyncStorage.setItem("token", response.data.token);
+        // await AsyncStorage.setItem("user", response.data.user);
         navigation.navigate("OTP");
-      }, 3000);
+      } catch (error) {
+        console.error("Error:", error.response?.data || error.message);
+      }
     }
   };
 

@@ -42,14 +42,17 @@ const SurveysScreen = () => {
     >
       <Topbar />
       <TouchableOpacity
-        style={styles.newSurveyButton}
+        style={[
+          styles.newSurveyButton,
+          { backgroundColor: theme.colors.primary, borderRadius: 6 },
+        ]}
         onPress={() =>
           navigation.navigate("TakeSurveyScreen", {
             onTabChange: setActiveTab,
           })
         }
       >
-        <Text style={[styles.newSurveyText, { color: theme.colors.primary }]}>
+        <Text style={[styles.newSurveyText, { color: "#fff" }]}>
           Start a New Survey
         </Text>
       </TouchableOpacity>
