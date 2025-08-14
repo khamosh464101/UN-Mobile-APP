@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -12,6 +12,7 @@ import {
   StatusBar,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Logo from "../../../assets/images/Logo.png";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
@@ -21,6 +22,12 @@ import { commonStyles } from "../../../styles/commonStyles";
 import { validateOTP } from "../../../utils/validation";
 import { COLORS } from "../../../styles/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from '@react-native-firebase/auth';
+import firestore from "@react-native-firebase/firestore";
+import axios from "../../../utils/axios";
+import Toast from "react-native-toast-message";
+import { getErrorMessage } from "../../../utils/tools";
+import messaging from '@react-native-firebase/messaging';
 
 export default function OTPVerificationScreen({ navigation }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -28,8 +35,25 @@ export default function OTPVerificationScreen({ navigation }) {
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [otpError, setOtpError] = useState("");
+  const [confirm, setConfirm] = useState(null);
+  const [verificationMethod, setVerificationMethod] = useState("Email");
+  const [otpRequestLoading, setOtpRequestLoading] = useState(false);
+  useEffect(() => {
+    checkStorage();
+  }, []);
 
-  console.log(AsyncStorage.getItem("token"));
+  const checkStorage = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      let user = await AsyncStorage.getItem("user");
+      user = JSON.parse(user);
+      console.log('444444444', user);
+    } catch (error) {
+      console.log("Error retrieving token:", error);
+    }
+  };
+
+  
   const handleChange = (text, index) => {
     if (/^\d$/.test(text)) {
       const newOtp = [...otp];
@@ -52,38 +76,132 @@ export default function OTPVerificationScreen({ navigation }) {
     }
   };
 
-  const handleVerify = () => {
-    const otpString = otp.join("");
-    const otpValidation = validateOTP(otpString);
-    setOtpError(otpValidation);
+const handleVerify = async () => {
+  const token = await AsyncStorage.getItem("token");
+  const otpString = otp.join("");
+  console.log('OTP String:', otpString);
+  
+  if (!token) {
+    console.error("No token found, aborting request.");
+    return;
+  }
 
-    if (!otpValidation) {
-      setVerifyLoading(true);
-      setTimeout(() => {
-        setVerifyLoading(false);
-        if (otpString !== "770415") {
-          setOtpError("Invalid code. Please try again.");
-        } else {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Dashboard" }],
+  if (verificationMethod === 'Phone') {
+    await confirmCode();
+    return;
+  } 
+  setVerifyLoading(true);
+
+  const deviceToken = await messaging().getToken();
+  const payload = {
+        two_factor_code: otpString,
+        deviceToken,
+      };
+  try {
+    const {data:result} = await axios.post(`/api/verify`, payload);
+    setVerifyLoading(false);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Dashboard" }],
+    });
+  } catch (error) {
+    Toast.show({
+            type: 'error',
+            text1: 'Failed!',
+            text2: getErrorMessage(error)
           });
-        }
-      }, 2000);
-    }
-  };
+    setVerifyLoading(false);
+  }
+};
 
-  const handleResend = () => {
+
+  const handleResend = async () => {
+    setVerificationMethod("Email");
+  const token = await AsyncStorage.getItem("token");  
+  if (!token) {
+    console.error("No token found, aborting request.");
+    return;
+  }
     setResendLoading(true);
-    setTimeout(() => {
+    try {
+      const {data:result} = await axios.get(`/api/verify/resend`);
       setResendLoading(false);
       Alert.alert(
-        "OTP Sent",
-        "A 6-digit code has been sent to your registered number.",
-        [{ text: "OK" }]
-      );
-    }, 2000);
+          "OTP Sent",
+          "A 6-digit code has been sent to your email.",
+          [{ text: "OK" }]
+        );
+    } catch (error) {
+      Toast.show({
+              type: 'error',
+              text1: 'Failed!',
+              text2: getErrorMessage(error)
+            });
+      setResendLoading(false);
+    }
+
   };
+
+  const handleOTPRequest = async () => {
+  setVerificationMethod("Phone");
+  setOtpRequestLoading(true);
+
+  let user = await AsyncStorage.getItem("user");
+  user = JSON.parse(user);
+  const phoneNumber = user.phone;
+
+  try {
+    const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+    setConfirm(confirmation);
+    setOtpRequestLoading(false);
+    Toast.show({
+              type: 'success',
+              text1: 'Success',
+              text2: 'A 6 digt code has been sent to your phone!'
+            });
+  } catch (error) {
+    setOtpRequestLoading(false);
+    console.log("Error sending code:", error);
+    Toast.show({
+        type: 'error',
+        text1: 'Failed!',
+        text2: getErrorMessage(error)
+      });
+  }
+};
+
+
+  const  confirmCode = async () => {
+    try {
+     const otpString = otp.join("");
+     const userCredential = await confirm.confirm(otpString);
+     const user = userCredential.user;
+     const idToken = await user.getIdToken();
+     const phone = user.phoneNumber;
+
+     const deviceToken = await messaging().getToken();
+     const {data:result} = await axios.post(`/api/phoneVerify`, {
+          idToken,
+          phone,
+          deviceToken,
+        });
+
+        console.log("232323232", result);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Dashboard" }],
+    });
+
+    //  CHECK IF THE USER IS NEW OR EXISTING
+    } catch (error) {
+      console.log('1112222',error);
+      Toast.show({
+                type: 'error',
+                text1: 'Failed!',
+                text2: getErrorMessage(error)
+              });
+    }
+  }
 
   return (
     <SafeAreaView style={commonStyles.container}>
@@ -138,9 +256,20 @@ export default function OTPVerificationScreen({ navigation }) {
 
             <View style={styles.resendContainer}>
               <Text style={styles.resendText}>Did not receive a code?</Text>
-              <TouchableOpacity onPress={handleResend}>
+              {/* <TouchableOpacity onPress={handleResend}>
                 <Text style={styles.resendLink}>Resend</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
+              <TouchableOpacity
+              onPress={handleResend}
+              disabled={resendLoading} // disable when loading to prevent multiple clicks
+              style={styles.resendButton} // if you have button styles
+            >
+              {resendLoading ? (
+                <ActivityIndicator size="small" color="#e2e2e2" /> // your desired color
+              ) : (
+                <Text style={styles.resendLink}>Resend</Text>
+              )}
+            </TouchableOpacity>
             </View>
 
             <Button
@@ -151,8 +280,8 @@ export default function OTPVerificationScreen({ navigation }) {
 
             <Button
               title="Send OTP as SMS"
-              onPress={handleResend}
-              loading={resendLoading}
+              onPress={handleOTPRequest}
+              loading={otpRequestLoading}
               variant="secondary"
             />
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import notificationsData from "../../utils/notificationsData.json";
 import { useNavigation } from "@react-navigation/native";
@@ -9,12 +9,31 @@ import NotificationFull from "../../assets/icons/notification-full.svg";
 import NotificationFullDark from "../../assets/icons/notification-full-dark.svg";
 import { COLORS } from "../../styles/colors";
 import { ThemeContext } from "../../utils/ThemeContext";
+import { useUser } from "../../../UserContext";
+import usePresence from "../../utils/use-presence";
 
 const Topbar = () => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme.dark;
   const navigation = useNavigation();
   const [hasUnread, setHasUnread] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const { user } = useUser();
+
+  usePresence(user?.id);
+
+  useEffect(() => {
+    getUser();
+  }, [user]);
+
+  const getUser = async () => {
+    const [first_name, ...rest] = user?.name.split(" ");
+    const last_name = rest.join(" ");
+    setFirstName(first_name);
+    setLastName(last_name);
+
+  }
 
   useEffect(() => {
     const checkUnreadNotifications = async () => {
@@ -54,17 +73,23 @@ const Topbar = () => {
         style={styles.profileWrapper}
         onPress={() => navigation.navigate("Profile")}
       >
-        <View
+        <Image
+          source={
+            user?.photo
+              ? { uri: user.photo }
+              : require('../../assets/images/Head.png')
+          }
           style={[styles.avatar, { backgroundColor: theme.colors.lightBlack }]}
+          resizeMode="cover"
         />
         <View style={{ marginLeft: 10 }}>
           <Text style={[styles.userName, { color: theme.colors.text }]}>
-            Atiqullah
+            {firstName}
           </Text>
           <Text
             style={[styles.userSubtitle, { color: theme.colors.secondaryText }]}
           >
-            Sadeqi
+            {lastName}
           </Text>
         </View>
       </TouchableOpacity>

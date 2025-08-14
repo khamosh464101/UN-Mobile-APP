@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import "react-native-gesture-handler";
 
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 
@@ -20,21 +20,31 @@ import { SQLiteProvider } from "expo-sqlite";
 import { initDatabase } from "./src/services/database";
 import NetworkWrapper from "./src/components/common/NetworkWrapper";
 import NetworkStatus from "./src/components/common/NetworkStatus";
+import Toast from 'react-native-toast-message';
+import { UserProvider } from './UserContext';
+import messaging from '@react-native-firebase/messaging';
+import useFCMNotifications from "./src/utils/notificationServices";
+import { navigationRef } from "./src/utils/navigationRef";
+
 
 const Stack = createNativeStackNavigator();
 
 function MainApp() {
   const { theme } = useContext(ThemeContext);
 
+  useFCMNotifications();
+
+
   return (
-    <SearchProvider>
-      <NavigationContainer>
+   <UserProvider>
+     <SearchProvider>
+      <NavigationContainer ref={navigationRef}>
         <StatusBar style={theme.dark ? "light" : "dark"} />
         <NetworkStatus />
         <NetworkWrapper>
           <Stack.Navigator
             screenOptions={{ headerShown: false }}
-            initialRouteName="Login"
+            initialRouteName="Dashboard"
           >
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="OTP" component={OTPVerificationScreen} />
@@ -51,6 +61,7 @@ function MainApp() {
         </NetworkWrapper>
       </NavigationContainer>
     </SearchProvider>
+   </UserProvider>
   );
 }
 
@@ -60,6 +71,7 @@ export default function App() {
       <SQLiteProvider databaseName="survey.db" onInit={initDatabase}>
         <MainApp />
       </SQLiteProvider>
+      <Toast />
     </ThemeProvider>
   );
 }

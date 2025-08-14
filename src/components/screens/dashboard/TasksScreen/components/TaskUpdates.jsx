@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-
 import {
   View,
   Text,
@@ -9,28 +8,122 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  useWindowDimensions
 } from "react-native";
 import SendIcon from "../../../../../assets/icons/send.svg";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
+import Toast from 'react-native-toast-message';
+import RenderHTML from 'react-native-render-html';
+import axios from "../../../../../utils/axios";
+import { getErrorMessage } from "../../../../../utils/tools";
+import { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const TaskUpdates = ({ task }) => {
+const TaskUpdates = ({ task, setTask }) => {
   const { theme } = useContext(ThemeContext);
   const [input, setInput] = useState("");
-  const [comments, setComments] = useState(task.comments || []);
+  const { width } = useWindowDimensions();
+  const [editId, setEditId] = useState(null);
+  const [selectedCommentId, setSelectedCommentId] = useState(null);
+  const [authUserId, setAuthUserId] = useState(null);
 
-  const handleAddComment = () => {
+  useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const user = await AsyncStorage.getItem('user');
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        setAuthUserId(parsedUser.id); // or whatever property holds the user ID
+      }
+    } catch (error) {
+      console.error('Error reading user from AsyncStorage:', error);
+    }
+  };
+
+  fetchUser();
+}, []);
+
+  const handleAddComment = async () => {
     if (!input.trim()) return;
 
-    const newComment = {
-      id: comments.length + 1,
-      author: "You",
-      message: input,
-      timestamp: new Date().toISOString().slice(0, 16).replace("T", " "),
-    };
+    let url = `/api/ticket-comments`;
+    if (editId) {
+      url = `/api/ticket-comments/${editId}`;
+    }
+    try {
+      const payload = {
+          ticket_id: task.id,
+          content: input,
+        };
+      const {data:result} = editId
+        ? await axios.put(url, payload)
+        : await axios.post(url, payload);
 
-    setComments([...comments, newComment]);
-    setInput("");
+        if (editId) {
+          let tmp = task.comments.map((item) => {
+            if (item.id === editId) {
+              return { ...item, content: result.data.content };
+            }
+            return item;
+          });
+          setTask((prv) => ({...prv, comments: tmp}));
+        } else {
+           setTask((prv) => ({...prv, comments: [...prv.comments, result.data]}));
+        }
+        setEditId(null);
+        setInput("");
+        setSelectedCommentId(null);
+        Toast.show({
+          type: 'success',
+          text1: 'Success!',
+          text2: 'Successfully added 👋'
+        });
+    } catch (error) {
+      Toast.show({
+          type: 'error',
+          text1: 'Failed!',
+          text2: getErrorMessage(error)
+        });
+    }
   };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await axios.delete(`/api/ticket-comments/${commentId}`);
+      setTask(prev => ({
+        ...prev,
+        comments: prev.comments.filter(comment => comment.id !== commentId)
+      }));
+      setSelectedCommentId(null);
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Comment deleted successfully'
+      });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed!',
+        text2: getErrorMessage(error)
+      });
+    }
+  };
+
+  const handleEditComment = (comment) => {
+    setInput(comment.content);
+    setEditId(comment.id);
+    setSelectedCommentId(null);
+  };
+
+  const handleCommentPress = (commentId) => {
+    if (selectedCommentId === commentId) {
+      setSelectedCommentId(null);
+    } else {
+      setSelectedCommentId(commentId);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -38,7 +131,7 @@ const TaskUpdates = ({ task }) => {
       keyboardVerticalOffset={0}
     >
       <View style={styles.container}>
-        {task.comments.length === 0 ? (
+        {task?.comments?.length === 0 ? (
           <View
             style={{
               flex: 1,
@@ -62,35 +155,68 @@ const TaskUpdates = ({ task }) => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
           >
-            {comments.map((comment) => (
+            {task.comments.map((comment) => (
               <View key={comment.id} style={styles.commentContainer}>
-                <View
-                  style={[
-                    styles.avatar,
-                    { backgroundColor: theme.colors.lightBlack },
-                  ]}
+                <Image
+                  source={
+                    comment?.user?.photo
+                      ? { uri: comment.user.photo }
+                      : require('../../../../../assets/images/Head.png')
+                  }
+                  style={[styles.avatar, { backgroundColor: theme.colors.lightBlack }]}
+                  resizeMode="cover"
                 />
-                <View
-                  style={[
-                    styles.commentBox,
-                    { backgroundColor: theme.colors.lightBlack },
-                  ]}
-                >
-                  <Text style={[styles.author, { color: theme.colors.text }]}>
-                    {comment.author}
-                  </Text>
-                  <Text style={[styles.message, { color: theme.colors.text }]}>
-                    {comment.message}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.timestamp,
-                      { color: theme.colors.secondaryText },
-                    ]}
+                
+                <View style={styles.commentWrapper}>
+                  <TouchableOpacity 
+                    activeOpacity={0.8}
+                    onPress={() => handleCommentPress(comment.id)}
                   >
-                    {comment.timestamp.split(" ")[0]} 
-                    {comment.timestamp.split(" ")[1]}
-                  </Text>
+                    <View
+                      style={[
+                        styles.commentBox,
+                        { backgroundColor: theme.colors.lightBlack },
+                      ]}
+                    >
+                      <Text style={[styles.author, { color: theme.colors.text }]}>
+                        {comment?.user?.name}
+                      </Text>
+                      <Text style={[styles.message, { color: theme.colors.text }]}>
+                        <RenderHTML
+                          contentWidth={width}
+                          source={{
+                              html: comment?.content,
+                            }}
+                          baseStyle={{ color: theme.colors.text }}
+                        />
+                      </Text>
+                      <Text
+                        style={[
+                          styles.timestamp,
+                          { color: theme.colors.secondaryText },
+                        ]}
+                      >
+                        {comment?.created_at} 
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  {selectedCommentId === comment.id && comment?.user?.id === authUserId &&(
+                    <View style={styles.actionButtons}>
+                      <TouchableOpacity 
+                        style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
+                        onPress={() => handleEditComment(comment)}
+                      >
+                        <Text style={styles.actionButtonText}>Edit</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[styles.actionButton, { backgroundColor: "#A52A2A" }]}
+                        onPress={() => handleDeleteComment(comment.id)}
+                      >
+                        <Text style={styles.actionButtonText}>Delete</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}
@@ -122,6 +248,7 @@ const TaskUpdates = ({ task }) => {
 };
 
 export default TaskUpdates;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -134,6 +261,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 20,
   },
+  commentWrapper: {
+    flex: 1,
+  },
   avatar: {
     width: 36,
     height: 36,
@@ -141,9 +271,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   commentBox: {
-    flex: 1,
     borderRadius: 12,
     padding: 12,
+    marginBottom: 4,
   },
   author: {
     fontWeight: "bold",
@@ -166,5 +296,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 12,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 16,
+  },
+  actionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 14,
   },
 });

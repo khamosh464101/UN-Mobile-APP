@@ -2,27 +2,19 @@ import React, { useContext } from "react";
 import { Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
 
-const filters = ["All", "Open", "In Progress", "Closed"];
-
-const TaskFilter = ({ activeFilter, onFilterChange, tasks }) => {
+const TaskFilter = ({ activeIndex, setActiveIndex, data }) => {
   const { theme } = useContext(ThemeContext);
-  const countByStatus = (status) =>
-    status === "All"
-      ? tasks.length
-      : tasks.filter(
-          (task) => task.status.toLowerCase() === status.toLowerCase()
-        ).length;
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
-      {filters.map((item) => {
-        const isActive = activeFilter === item;
+      {data.map((item, index) => {
+        const isActive = activeIndex === index;
         return (
           <TouchableOpacity
-            key={item}
+            key={index}
             style={[
               styles.button,
               isActive
@@ -31,7 +23,7 @@ const TaskFilter = ({ activeFilter, onFilterChange, tasks }) => {
                     backgroundColor: theme.colors.lightBlack,
                   },
             ]}
-            onPress={() => onFilterChange(item)}
+            onPress={() => setActiveIndex(index)}
           >
             <Text
               style={[
@@ -40,7 +32,7 @@ const TaskFilter = ({ activeFilter, onFilterChange, tasks }) => {
                 isActive && styles.activeText,
               ]}
             >
-              {item} ({countByStatus(item)})
+              {item.title} ({item.tickets.length})
             </Text>
           </TouchableOpacity>
         );

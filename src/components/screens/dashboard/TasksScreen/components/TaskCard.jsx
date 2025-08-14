@@ -1,23 +1,15 @@
 import React, { useContext } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const TaskCard = ({ task, onPressViewDetails }) => {
   const { theme } = useContext(ThemeContext);
+  console.log('3434343', task)
 
-  const getStatusStyle = (status) => {
-    switch (status.toLowerCase()) {
-      case "open":
-        return { backgroundColor: theme.colors.primary, color: "#fff" }; // Purple
-      case "in progress":
-        return { backgroundColor: theme.colors.secondary, color: "#000" }; // Yellow
-      case "closed":
-        return { backgroundColor: theme.colors.danger, color: "#fff" }; // Red
-      default:
-        return { backgroundColor: "#ccc", color: "#000" };
-    }
+  const getPriorityStyle = (priority) => {
+    return { backgroundColor: priority.color, color: '#FFFFFF' };
   };
-  const statusStyle = getStatusStyle(task.status);
+  const priorityStyle = getPriorityStyle(task.priority);
   return (
     <View style={[styles.card, { backgroundColor: theme.colors.lightBlack }]}>
       <View>
@@ -28,17 +20,17 @@ const TaskCard = ({ task, onPressViewDetails }) => {
           <View
             style={[
               styles.statusBadge,
-              { backgroundColor: statusStyle.backgroundColor },
+              { backgroundColor: priorityStyle.backgroundColor },
             ]}
           >
-            <Text style={[styles.statusText, { color: statusStyle.color }]}>
-              {task.status}
+            <Text style={[styles.statusText, { color: priorityStyle.color }]}>
+              {task?.priority?.title}
             </Text>
           </View>
         </View>
 
         <Text style={[styles.subText, { color: theme.colors.secondaryText }]}>
-          #{task.id}
+          {task.ticket_number}
         </Text>
       </View>
       <View
@@ -54,14 +46,18 @@ const TaskCard = ({ task, onPressViewDetails }) => {
             Assigned By
           </Text>
           <View style={styles.avatarWrapper}>
-            <View
-              style={[
-                styles.avatar,
-                { backgroundColor: theme.colors.background },
-              ]}
-            ></View>
+            <Image
+              source={
+                task?.owner?.photo
+                  ? { uri: task.owner.photo }
+                  : require('../../../../../assets/images/Head.png')
+              }
+              style={[styles.avatar, { backgroundColor: theme.colors.lightBlack }]}
+              resizeMode="cover"
+            />
+    
             <Text style={[styles.value, { color: theme.colors.text }]}>
-              {task.assignedBy.name}
+              {task?.owner?.name}
             </Text>
           </View>
         </View>

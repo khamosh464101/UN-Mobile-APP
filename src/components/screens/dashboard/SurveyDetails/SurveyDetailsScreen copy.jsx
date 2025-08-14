@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -18,15 +18,11 @@ import Constants from "expo-constants";
 import Axioss from 'axios';
 import axios from "../../../../utils/axios";
 import { getErrorMessage } from "../../../../utils/tools";
-// import { toFlatten } from "../../../../utils/toFlatten";
-import Toast from "react-native-toast-message";
-import { useFocusEffect } from "@react-navigation/native";
-import toFlatten from "../../../../utils/flatten";
+import { toFlatten } from "../../../../utils/toFlatten";
 
 const SurveyDetailsScreen = ({ route, navigation }) => {
   const { theme } = useContext(ThemeContext);
   const [surveyData, setSurveyData] = useState(null);
-  const [survey, setSurvey] = useState([]);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const sqlite = useSQLiteContext();
@@ -35,97 +31,98 @@ const SurveyDetailsScreen = ({ route, navigation }) => {
   // API configuration
   const apiURL = Constants.expoConfig.extra.API_URL;
   const apiToken = Constants.expoConfig.extra.PUBLIC_API_KEY;
-    // Get answers for this session
-const fetchAnswers = useCallback(async (currentSurvey) => {
-  try {
-    if (!sessionId) return;
-    
-    const { data: result } = await axios.get(
-      `/data-managements/submissions/edit/${sessionId}`
-    );
-    
-    const flattenedData = toFlatten(result);
-    console.log("Raw API response:", flattenedData);
 
-    const transformedAnswers = Object.entries(flattenedData).reduce((acc, [key, value]) => {
-      const question = currentSurvey.find((row) => row.name === key);  // Changed from survey to currentSurvey
-      if (question) {
-        acc[question.$kuid] = {
-          value,
-          type: mapKoBoTypeToLocalType(question.type)
-        };
+  const loadSurveyDetails = async () => {
+    
+    try {
+      if (!sqlite) {
+        throw new Error("SQLite context not available");
       }
-      return acc;
-    }, {});
+      console.log('wwwworkds1212')
 
-    console.log("Processed answers:", transformedAnswers);
-    setAnswers(transformedAnswers);
-    
-  } catch (error) {
-    console.error('Error fetching answers:', error);
-    Toast.show({
-      type: 'error',
-      text1: 'Failed to load answers',
-      text2: getErrorMessage(error),
-      visibilityTime: 4000
-    });
-    throw error;
-  }
-}, [sessionId]);
+      // Get session details
+      const session = await db.getSurveySession(sqlite, sessionId);
+      console.log("Session details:", session);
 
-const fetchSurveyData = useCallback(async () => {
-  try {
-    setLoading(true);
-    
-    // Fetch survey questions from API
-    const { data: result } = await axios.get(`/data-management/get-form`);
-    const parsedData = JSON.parse(result.raw_schema);
-    
-    const transformedQuestions = transformKoBoData(parsedData);
-    const { survey: surveyQuestions } = parsedData.asset.content;
-    console.log('Survey questions:', surveyQuestions);
-    
-    // Update both survey and surveyData
-    setSurvey(surveyQuestions);
-    setSurveyData({ questions: transformedQuestions });
-    
-    // Fetch answers using the newly set surveyQuestions
-    await fetchAnswers(surveyQuestions);
-    
-  } catch (error) {
-    console.error("Error loading survey details:", error);
-    Alert.alert(
-      "Error", 
-      error.response?.data?.message || "Failed to load survey details. Please try again."
-    );
-    throw error;
-  } finally {
-    setLoading(false);
-  }
-}, [sessionId, fetchAnswers]);  // Added fetchAnswers as dependency
-
-useFocusEffect(
-  useCallback(() => {
-    let isActive = true;
-
-    const loadData = async () => {
-      try {
-        await fetchSurveyData();
-      } catch (error) {
-        if (isActive) {
-          console.log("Data loading error:", error);
+      // Get answers for this session
+      const getData = async () => {
+        try {
+          let {data:result} = await axios.get(
+          `/data-managements/submissions/edit/${id}`);
+          // dispatch(setGeneralSubmission(result));
+           result = toFlatten(result);
+           console.log('1232344', result);
+          // setSubmission(result);
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: getErrorMessage(error),
+            icon: "error",
+          });
         }
+      };
+      const getSessionAnswers = async () => {
+        try {
+          if (!sqlite) {
+            throw new Error("SQLite context not available");
+          }
+
+          const answers = await db.getSessionAnswers(sqlite, sessionId);
+          console.log("Raw session answers:", answers);
+
+          // Transform answers into a more usable format
+          const transformedAnswers = answers.reduce((acc, answer) => {
+            acc[answer.question_id] = {
+              value: answer.value,
+              type: answer.type,
+            };
+            return acc;
+          }, {});
+
+          console.log("Transformed answers:", transformedAnswers);
+          setAnswers(transformedAnswers);
+        } catch (error) {
+          console.error("Error getting session answers:", error);
+          Alert.alert(
+            "Error",
+            "Failed to load survey answers. Please try again."
+          );
+        }
+      };
+
+      // Fetch survey questions from API
+      try {
+        const response = await Axioss.get(apiURL, {
+          headers: {
+            Authorization: `Token ${apiToken}`,
+            Accept: "application/json",
+          },
+        });
+
+        const transformedQuestions = transformKoBoData(response.data);
+        console.log("Transformed questions:", transformedQuestions);
+        setSurveyData({ session, questions: transformedQuestions });
+        await getSessionAnswers();
+        await getData();
+      } catch (err) {
+        console.error("Error fetching survey:", err);
+        Alert.alert(
+          "Error",
+          "Failed to load survey questions. Please try again."
+        );
       }
-    };
 
-    loadData();
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading survey details:", error);
+      Alert.alert("Error", "Failed to load survey details. Please try again.");
+      setLoading(false);
+    }
+  };
 
-    return () => {
-      isActive = false;
-    };
-  }, [fetchSurveyData])  // Only depends on fetchSurveyData
-);
-
+  useEffect(() => {
+    loadSurveyDetails();
+  }, [sqlite, sessionId]);
 
   // Helper function to find a question by ID
   const findQuestionById = (id, questions = surveyData?.questions) => {
@@ -482,11 +479,11 @@ useFocusEffect(
             </Text>
             <Text style={[styles.date, { color: theme.colors.secondaryText }]}>
               Finalized:{" "}
-              {/* {new Date(surveyData?.session.end_time).toLocaleDateString()} */}
+              {new Date(surveyData?.session.end_time).toLocaleDateString()}
             </Text>
           </View>
 
-          {/* {surveyData?.session.status === "finalized" && (
+          {surveyData?.session.status === "finalized" && (
             <TouchableOpacity
               style={[
                 styles.submitButton,
@@ -496,7 +493,7 @@ useFocusEffect(
             >
               <Text style={styles.submitButtonText}>Submit Survey</Text>
             </TouchableOpacity>
-          )} */}
+          )}
 
           <ScrollView style={styles.content}>
             <View style={styles.answersContainer}>

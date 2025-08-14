@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "../../../../utils/ThemeContext";
 import * as db from "../../../../services/database";
 import { format } from "date-fns";
+import { getErrorMessage } from "../../../../utils/tools";
+import axios from "../../../../utils/axios";
 
 const SubmittedSurveysScreen = () => {
   const [surveys, setSurveys] = useState([]);
@@ -20,22 +22,46 @@ const SubmittedSurveysScreen = () => {
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
 
-  useEffect(() => {
-    loadSurveys();
-  }, []);
 
-  const loadSurveys = async () => {
+  useFocusEffect(
+  useCallback(() => {
+    getData();
+  }, [])
+);
+
+  const getData = async () => {
+    const url = `/api/mobile/submissions`;
     try {
-      const result = await db.getAllAsync(
-        "SELECT * FROM survey_sessions WHERE status = 'submitted' ORDER BY id DESC"
-      );
-      setSurveys(result);
+      const {data:result} = await axios.get(url);
+      console.log(result)
+      setSurveys(result)
     } catch (error) {
-      console.error("Error loading submitted surveys:", error);
-    } finally {
+      console.log(error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed!',
+        text2: getErrorMessage(error)
+      });
+    }finally{
       setLoading(false);
     }
-  };
+  }
+  // useEffect(() => {
+  //   loadSurveys();
+  // }, []);
+
+  // const loadSurveys = async () => {
+  //   try {
+  //     const result = await db.getAllAsync(
+  //       "SELECT * FROM survey_sessions WHERE status = 'submitted' ORDER BY id DESC"
+  //     );
+  //     setSurveys(result);
+  //   } catch (error) {
+  //     console.error("Error loading submitted surveys:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const formatDate = (dateString) => {
     try {
@@ -48,7 +74,7 @@ const SubmittedSurveysScreen = () => {
   };
 
   const handleSurveyPress = (survey) => {
-    navigation.navigate("SurveyDetailsScreen", { sessionId: survey.id });
+    navigation.navigate("EditSubmittedSurveyScreen", { sessionId: survey.id });
   };
 
   if (loading) {
@@ -93,7 +119,7 @@ const SubmittedSurveysScreen = () => {
                     { backgroundColor: theme.colors.primary },
                   ]}
                 >
-                  <Text style={styles.statusLabel}>Submitted</Text>
+                  <Text style={styles.statusLabel}>Need to validate</Text>
                 </View>
               </View>
               <Text
@@ -102,7 +128,7 @@ const SubmittedSurveysScreen = () => {
                   { color: theme.colors.secondaryText },
                 ]}
               >
-                Submitted on {formatDate(item.end_time)}
+                Submitted on {formatDate(item.today)}
               </Text>
             </TouchableOpacity>
           )}

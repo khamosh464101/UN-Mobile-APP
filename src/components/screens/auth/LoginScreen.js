@@ -20,8 +20,12 @@ import { Button } from "../../common/Button";
 import { commonStyles } from "../../../styles/commonStyles";
 import { validateEmail, validatePassword } from "../../../utils/validation";
 import { COLORS } from "../../../styles/colors";
-import axios from "axios";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "../../../utils/axios";
+import Toast from "react-native-toast-message";
+import { getErrorMessage } from "../../../utils/tools";
+import { useUser } from "../../../../UserContext";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -30,6 +34,7 @@ export default function LoginScreen({ navigation }) {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { user, updateUser } = useUser();
 
   const passwordRef = useRef(null);
   const handleLogin = async () => {
@@ -41,21 +46,27 @@ export default function LoginScreen({ navigation }) {
 
     if (!emailValidation && !passwordValidation) {
       setLoading(true);
+      const payload = {
+              email: email,
+              password: password,
+            };
       try {
-        const response = await axios.post("https://un.momtazhost.com/login", {
-          email: email,
-          password: password,
-        });
-
-        // const { data } = response;
-
-        console.log("Response:", response);
-        // await AsyncStorage.setItem("token", response.data.token);
-        // await AsyncStorage.setItem("user", response.data.user);
+        const {data:result} = await axios.post('/login', payload);
+        AsyncStorage.setItem("token", result.access_token);
+        AsyncStorage.setItem("user", JSON.stringify(result.user));
+        updateUser(result.user);
         navigation.navigate("OTP");
+        setLoading(false);
       } catch (error) {
-        console.error("Error:", error.response?.data || error.message);
+        console.error(error)
+        setLoading(false)
+        Toast.show({
+          type: 'error',
+          text1: 'Failed!',
+          text2: getErrorMessage(error)
+        });
       }
+
     }
   };
 

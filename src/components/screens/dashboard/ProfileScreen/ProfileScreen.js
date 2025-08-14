@@ -1,24 +1,51 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
 import Topbar from "../../../common/Topbar";
 import { commonStyles } from "../../../../styles/commonStyles";
 import TabSwitcher from "../../../common/TabSwitcher";
 
 import personalInfo from "../../../../utils/personalinfo.json";
-import officialInfo from "../../../../utils/officialinfo.json";
 import PersonalInfo from "./components/PersonalInfo";
 import OfficialInfo from "./components/OfficialInfo";
 
 import { ThemeContext } from "../../../../utils/ThemeContext";
+import axios from "../../../../utils/axios";
+import { getErrorMessage } from "../../../../utils/tools";
+import { useFocusEffect } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
 
 export default function ProfileScreen() {
   const { theme } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState("personal");
+  const [staff, setStaff] = useState({});
 
   const tabs = [
     { key: "personal", label: "Personal Info" },
     { key: "official", label: "Official Info" },
   ];
+
+   useFocusEffect(
+    useCallback(() => {
+      getStaff();
+    }, [])
+  );
+
+   const getStaff = async () => {
+    try {
+      const {data:result} = await axios.get(`/api/user/profile`);
+    if (result.id) {
+      setStaff({
+        ...result
+      });
+    }
+    } catch (error) {
+       Toast.show({
+          type: 'error',
+          text1: 'Failed!',
+          text2: getErrorMessage(error)
+        });
+    }
+  };
 
   return (
     <View
@@ -39,17 +66,13 @@ export default function ProfileScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {personalInfo?.map((item, index) => {
-            return (
+          {staff?.id && (
               <PersonalInfo
-                key={index}
-                name={item.name}
-                email={item.email}
-                phone={item.phone}
-                staffDesc={item.staffDesc}
+                staff={staff}
+                setStaff={setStaff}
               />
-            );
-          })}
+            
+          )}
         </ScrollView>
       ) : (
         <ScrollView
@@ -57,21 +80,11 @@ export default function ProfileScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {officialInfo?.map((item, index) => {
-            return (
+          {staff?.id && (
               <OfficialInfo
-                key={index}
-                status={item.status}
-                position={item.position}
-                email={item.email}
-                phone={item.phone}
-                duty={item.duty}
-                joined={item.joined}
-                created={item.created}
-                updated={item.updated}
+                staff={staff}
               />
-            );
-          })}
+          )}
         </ScrollView>
       )}
     </View>

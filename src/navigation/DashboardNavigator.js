@@ -42,6 +42,7 @@ import { COLORS } from "../styles/colors";
 import { ThemeContext } from "../utils/ThemeContext";
 import SurveyDetailsScreen from "../components/screens/dashboard/SurveyDetails/SurveyDetailsScreen";
 import DraftSurveysScreen from "../components/screens/dashboard/DraftSurveys/DraftSurveysScreen";
+import EditSubmittedSurveyScreen from "../components/screens/dashboard/SubmittedSurveys/EditSubmittedSurveyScreen";
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
@@ -94,6 +95,11 @@ function SurveysStackScreen() {
       <SurveysStack.Screen
         name="SurveyDetailsScreen"
         component={SurveyDetailsScreen}
+        options={{ headerShown: false }}
+      />
+      <SurveysStack.Screen
+        name="EditSubmittedSurveyScreen"
+        component={EditSubmittedSurveyScreen}
         options={{ headerShown: false }}
       />
       <SurveysStack.Screen

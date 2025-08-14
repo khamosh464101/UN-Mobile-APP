@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import ProfileTickIcon from "../../../../../assets/icons/profile/profile-tick.svg";
 import ProfileTickDarkIcon from "../../../../../assets/icons/profile/profile-tick-dark.svg";
@@ -17,19 +17,27 @@ import CalendarDarkIcon from "../../../../../assets/icons/profile/calendar-dark.
 import CalendarEditIcon from "../../../../../assets/icons/profile/calendar-edit.svg";
 import CalendarEditDarkIcon from "../../../../../assets/icons/profile/calendar-edit-dark.svg";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OfficialInfo = ({
-  status,
-  position,
-  email,
-  phone,
-  duty,
-  joined,
-  created,
-  updated,
+  staff
+
 }) => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme.dark;
+  const [user, setUser] = useState();
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  const getUser = async () => {
+    let tmpUser = await AsyncStorage.getItem('user');
+    tmpUser = JSON.parse(tmpUser);
+    console.log("user", tmpUser);
+    setUser(tmpUser);
+
+  }
   return (
     <View>
       <View style={styles.container}>
@@ -45,8 +53,8 @@ const OfficialInfo = ({
           <Text style={[styles.label, { color: theme.colors.secondaryText }]}>
             Status
           </Text>
-          <Text style={[styles.value, { color: theme.colors.text }]}>
-            {status}
+          <Text style={[styles.value, { color: `${staff?.status?.color}` }]}>
+            {staff?.status?.title}
           </Text>
         </View>
       </View>
@@ -64,7 +72,7 @@ const OfficialInfo = ({
             Position
           </Text>
           <Text style={[styles.value, { color: theme.colors.text }]}>
-            {position}
+            {staff?.position_title}
           </Text>
         </View>
       </View>
@@ -82,7 +90,7 @@ const OfficialInfo = ({
             Email
           </Text>
           <Text style={[styles.value, { color: theme.colors.text }]}>
-            {email}
+            {staff?.official_email}
           </Text>
         </View>
       </View>
@@ -100,7 +108,7 @@ const OfficialInfo = ({
             Phone
           </Text>
           <Text style={[styles.value, { color: theme.colors.text }]}>
-            {phone}
+            {staff?.phone1}
           </Text>
         </View>
       </View>
@@ -118,7 +126,7 @@ const OfficialInfo = ({
             Duty Station
           </Text>
           <Text style={[styles.value, { color: theme.colors.text }]}>
-            {duty}
+            {staff?.duty_station}
           </Text>
         </View>
       </View>
@@ -136,7 +144,7 @@ const OfficialInfo = ({
             Date of Joining
           </Text>
           <Text style={[styles.value, { color: theme.colors.text }]}>
-            {joined}
+            {staff?.date_of_joining}
           </Text>
         </View>
       </View>
@@ -154,7 +162,7 @@ const OfficialInfo = ({
             Created at
           </Text>
           <Text style={[styles.value, { color: theme.colors.text }]}>
-            {created}
+            {staff?.created_at_formatted}
           </Text>
         </View>
       </View>
@@ -167,7 +175,7 @@ const OfficialInfo = ({
             Updated at
           </Text>
           <Text style={[styles.value, { color: theme.colors.text }]}>
-            {updated}
+            {staff?.updated_at_formatted}
           </Text>
         </View>
       </View>

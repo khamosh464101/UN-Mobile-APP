@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { commonStyles } from "../../../../styles/commonStyles";
 import Topbar from "../../../common/Topbar";
@@ -7,28 +7,48 @@ import tasksData from "../../../../utils/tasks.json";
 import TaskCard from "./components/TaskCard";
 import { Dimensions } from "react-native";
 import { ThemeContext } from "../../../../utils/ThemeContext";
+import axios from "../../../../utils/axios";
+import { useFocusEffect } from "@react-navigation/native";
+import { getErrorMessage } from "../../../../utils/tools";
+import Toast from "react-native-toast-message";
 
-const filters = ["All", "Open", "In Progress", "Closed"];
+
 const screenHeight = Dimensions.get("window").height;
 
 const TasksScreen = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
+  const [data, setData] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+useFocusEffect(
+  useCallback(() => {
+    getData();
+  }, [])
+);
+
+  const getData = async () => {
+    const url = `/api/mobile/tickets`;
+    try {
+      const {data:result} = await axios.post(url);
+      setData(result);
+    } catch (error) {
+      console.log(error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed!',
+        text2: getErrorMessage(error)
+      });
+    }
+  }
   const handleViewDetails = (task) => {
-    navigation.navigate("TaskDetails", { task });
+    navigation.navigate("TaskDetails", { id: task.id });
   };
 
-  const handleFilterChange = (filter) => {
-    setActiveFilter(filter);
-  };
 
-  const [activeFilter, setActiveFilter] = useState("All");
 
-  const filteredTasks =
-    activeFilter === "All"
-      ? tasksData
-      : tasksData.filter(
-          (task) => task.status.toLowerCase() === activeFilter.toLowerCase()
-        );
+  
+
+
 
   return (
     <View
@@ -39,10 +59,9 @@ const TasksScreen = ({ navigation }) => {
     >
       <Topbar />
       <TaskFilter
-        activeFilter={activeFilter}
-        onFilterChange={handleFilterChange}
-        tasks={tasksData}
-        filter={filters}
+        activeIndex={activeIndex}
+        setActiveIndex={setActiveIndex}
+        data={data}
         style={{ paddingVertical: 10 }}
       />
 
@@ -50,7 +69,7 @@ const TasksScreen = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
       >
-        {filteredTasks.map((task, index) => (
+        {data[activeIndex]?.tickets?.map((task, index) => (
           <TaskCard
             key={index}
             task={task}

@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import React, { useCallback, useContext, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { SearchContext } from "../../../../utils/SearchContext";
 import {
   StyleSheet,
@@ -21,6 +21,9 @@ import {
   StackedBarChart,
   HorizontalBarChart,
 } from "react-native-gifted-charts";
+ import WebView from "react-native-webview";
+import axios from "../../../../utils/axios";
+import { getErrorMessage } from "../../../../utils/tools";
 
 const { width } = Dimensions.get("window");
 
@@ -30,6 +33,37 @@ export default function HomeScreen() {
   const { setSearchKeyword, setSearchResults } = useContext(SearchContext);
   const [selectedDataPoint, setSelectedDataPoint] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [statuses, setStatuses] = useState([]);
+  const [submissions, seteSubmissions] = useState(null);
+  const [projects, setProjects] = useState(null);
+  const [tasks, setTasks] = useState(null);
+
+  useFocusEffect(
+  useCallback(() => {
+    getData();
+  }, [])
+);
+
+  const getData = async () => {
+    const url = `/api/mobile/dashboard`;
+    try {
+      const {data:{statuses:s, submissions:sub, projects:p}} = await axios.get(url);
+      setStatuses(s);
+      seteSubmissions(sub);
+      setProjects(p);
+      const totalTasks = statuses.reduce((sum, status) => {
+                return sum + (status.tickets_count || 0);
+              }, 0);
+      setTasks(totalTasks);
+    } catch (error) {
+      console.log(error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed!',
+        text2: getErrorMessage(error)
+      });
+    }
+  }
 
   // Calculate summary data from the JSON structure
   const calculateSummaryData = () => {
@@ -262,23 +296,39 @@ export default function HomeScreen() {
             <View style={[styles.summaryCard, { backgroundColor: "#4F8EF7" }]}>
               <Text style={styles.summaryTitle}>Projects</Text>
               <Text style={styles.summaryValue}>
-                {summaryData.totalProjects}
+                {projects}
               </Text>
             </View>
             <View style={[styles.summaryCard, { backgroundColor: "#34C759" }]}>
               <Text style={styles.summaryTitle}>Tasks</Text>
-              <Text style={styles.summaryValue}>{summaryData.totalTasks}</Text>
+              <Text style={styles.summaryValue}>{tasks}</Text>
             </View>
             <View style={[styles.summaryCard, { backgroundColor: "#FF9500" }]}>
-              <Text style={styles.summaryTitle}>Sub-projects</Text>
+              <Text style={styles.summaryTitle}>Submissions</Text>
               <Text style={styles.summaryValue}>
-                {summaryData.totalSubProjects}
+                {submissions}
               </Text>
             </View>
           </View>
+          <Text style={[styles.statusTitle, { color: theme.colors.text }]}>
+            Task statuses
+          </Text>
+          <View style={styles.statusCol}>
+            {statuses.map((row, index) => (
+              <View key={index}>
+              <Text style={[styles.statusLabel, { color: theme.colors.text }]}>{row.title}</Text>
+            <View style={[styles.statusBar, { backgroundColor: row.color }]}>
+              <Text style={styles.statusValue}>
+                {row.tickets_count}
+              </Text>
+            </View>
+            </View>
+            ))}
+   
+          </View>
 
           {/* LineChart: Projects Created per Month */}
-          <Text style={styles.chartTitle}>Projects Created per Month</Text>
+          {/* <Text style={styles.chartTitle}>Projects Created per Month</Text>
           <View style={styles.chartContainer}>
             <LineChart
               data={projectsPerMonthData}
@@ -355,10 +405,10 @@ export default function HomeScreen() {
                 return null;
               }}
             />
-          </View>
+          </View> */}
 
           {/* PieChart: Task Status Distribution */}
-          <Text style={styles.chartTitle}>Task Status Distribution</Text>
+          {/* <Text style={styles.chartTitle}>Task Status Distribution</Text>
           <PieChart
             data={pieChartData}
             donut
@@ -371,10 +421,10 @@ export default function HomeScreen() {
               <Text style={{ fontWeight: "bold", fontSize: 16 }}>Tasks</Text>
             )}
             isAnimated
-          />
+          /> */}
 
           {/* HorizontalBarChart: Tasks per User */}
-          <Text style={styles.chartTitle}>Tasks per User</Text>
+          {/* <Text style={styles.chartTitle}>Tasks per User</Text>
           <BarChart
             horizontal
             data={tasksPerUserData}
@@ -387,10 +437,10 @@ export default function HomeScreen() {
             xAxisLabelTextStyle={styles.axisLabel}
             yAxisTextStyle={styles.axisLabel}
             isAnimated
-          />
+          /> */}
 
           {/* BarChart: Tasks per Sub-Project */}
-          <Text style={styles.chartTitle}>Tasks per Sub-Project</Text>
+          {/* <Text style={styles.chartTitle}>Tasks per Sub-Project</Text>
           <BarChart
             data={tasksPerSubProjectData}
             width={width - 40}
@@ -402,10 +452,10 @@ export default function HomeScreen() {
             xAxisLabelTextStyle={styles.axisLabel}
             yAxisTextStyle={styles.axisLabel}
             isAnimated
-          />
+          /> */}
 
           {/* Multi-LineChart: Completed vs Canceled Tasks (Monthly) */}
-          <Text style={styles.chartTitle}>
+          {/* <Text style={styles.chartTitle}>
             Completed vs Canceled Tasks (Monthly)
           </Text>
           <LineChart
@@ -422,7 +472,24 @@ export default function HomeScreen() {
             xAxisColor="#eee"
             xAxisLabels={completedVsCanceledData.labels}
             isAnimated
-          />
+          /> */}
+          <View style={styles.container}>
+      <WebView
+        source={{
+          uri: 'https://app.powerbi.com/view?r=eyJrIjoiNDc4MWIzMmYtZWMxYS00ZTRlLTk5ODEtZjcwOWUwZDJmYzkwIiwidCI6ImQ4MTU4YjUyLTI0NGMtNGEwMS1iYjBkLWU3NGI2MmFiMjQzMyIsImMiOjEwfQ%3D%3D',
+        }}
+        originWhitelist={['*']}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        allowsInlineMediaPlayback={true}
+        startInLoadingState={true}
+        mixedContentMode="always"
+        style={{ flex: 1 }}
+        onError={(e) => console.warn('WebView error', e.nativeEvent)}
+        onHttpError={(e) => console.warn('WebView HTTP error', e.nativeEvent.statusCode)}
+      />
+    </View>
+          
         </ScrollView>
       </View>
     </View>
@@ -430,6 +497,12 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  webview: {
+    flex: 1,
+  },
   topBarWrapper: {
     paddingTop: 0,
     paddingHorizontal: 0,
@@ -473,12 +546,50 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
   },
+  statusTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  statusCol: {
+    flexDirection: "col",
+    justifyContent: "space-between",
+    width: '100%',
+    marginBottom: 10,
+    marginTop: 8,
+    gap: 12,
+  },
+  statusLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 5,
+  },
+  statusBar: {
+    flex: 1,
+    borderRadius: 16,
+    padding: 5,
+    alignItems: "center",
+    marginHorizontal: 2,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+
   summaryTitle: {
     color: "#fff",
     fontSize: 15,
     fontWeight: "600",
     marginBottom: 6,
     letterSpacing: 0.2,
+  },
+  statusValue: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
   },
   summaryValue: {
     color: "#fff",

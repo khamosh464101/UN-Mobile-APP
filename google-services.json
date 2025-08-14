@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "13510871839",
+    "firebase_url": "https://final-un-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "final-un",
+    "storage_bucket": "final-un.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:13510871839:android:8e8276602a8904a9ec3e2a",
+        "android_client_info": {
+          "package_name": "com.khamosh.UNHabitat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrWvL3RcUMawl2Ya5Igtt5DjgoS4ridZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

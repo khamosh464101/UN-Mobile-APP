@@ -1,27 +1,74 @@
-import React, { useContext } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useContext, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import CloseIcon from "../../../../../assets/icons/close.svg";
 import CloseDarkIcon from "../../../../../assets/icons/close-dark.svg";
 import { ThemeContext } from "../../../../../utils/ThemeContext";
+import { COLORS } from "../../../../../styles/colors";
+import axios from "../../../../../utils/axios";
+import { getErrorMessage } from "../../../../../utils/tools";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
 
-const NotificationItem = ({ notification, isRead, onPress }) => {
+const NotificationItem = ({ notification, isRead, setNotifications }) => {
+  const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const isDark = theme.dark;
-  const renderMessage = (notification) => {
-    switch (notification.type) {
-      case "comment":
-        return `${notification.actor} Commented on task ${notification.taskTitle}`;
-      case "update":
-        return `${notification.actor} Updated a task "${notification.taskTitle}"`;
-      case "assignment":
-        return `${notification.actor} Assigned a new task "${notification.taskTitle}"`;
-      default:
-        return "";
+  
+
+    const onPress = async () => {
+    const id = notification.id;
+    const taskId = notification?.data?.ticket_id;
+    console.log('workssssss');
+    try {
+      console.log('workssssss1');
+      if (!notification.read_at) {
+        const {data:{notification:n}} =  await axios.get(`/api/mobile/notifications/mark-as-read/${id}/${'pk'}`);
+        setNotifications((prev) =>
+          prev.map((item) => (item.id === id ? n : item))
+        );
+      }
+      const tab = notification?.type === 'Modules\\Projects\\Notifications\\Ticket\\TicketNotification'? "details" : "update";
+      navigation.navigate('Tasks', {
+        screen: 'TaskDetails',
+        params: { id: taskId, tab },
+      });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed!',
+        text2: getErrorMessage(error)
+      });
     }
   };
+
+  const onDelete = async () => {
+    const id = notification.id;
+    setDeleteLoading(true);
+    try {
+      const {data:{ message}} =  await axios.get(`/api/mobile/notifications/delete/${id}/${'pk'}`);
+        setNotifications((prev) =>
+          prev.filter((item) => item.id !== id)
+        );
+        Toast.show({
+                  type: 'success',
+                  text1: 'Success!',
+                  text2: message
+                });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed!',
+        text2: getErrorMessage(error)
+      });
+      ;
+    }finally {
+      setDeleteLoading(false);
+    }
+  }
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
+    <View
       style={[
         styles.notificationCard,
         { backgroundColor: theme.colors.secondaryBackground },
@@ -31,26 +78,44 @@ const NotificationItem = ({ notification, isRead, onPress }) => {
         ],
       ]}
     >
-      <View
-        style={[styles.avatar, { backgroundColor: theme.colors.background }]}
-      />
-      <View style={{ flex: 1 }}>
+      {/* Image as touchable */}
+      <TouchableOpacity onPress={onPress}>
+        <Image
+          source={
+            notification?.data?.causer_photo
+              ? { uri: notification?.data?.causer_photo }
+              : require("../../../../../assets/images/Head.png")
+          }
+          style={[styles.avatar, { backgroundColor: theme.colors.lightBlack }]}
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
+
+      {/* Title and time */}
+      <TouchableOpacity onPress={onPress} style={{ flex: 1 }}>
         <Text
           style={[
             { fontSize: 14, color: theme.colors.text, fontWeight: "600" },
             isRead && { fontWeight: "400" },
           ]}
         >
-          {renderMessage(notification)}
+          {notification?.data?.title}
         </Text>
         <Text style={{ fontSize: 12, color: theme.colors.secondaryText }}>
           {notification.timeAgo}
         </Text>
-      </View>
-      <TouchableOpacity>
-        {isDark ? <CloseDarkIcon /> : <CloseIcon />}
       </TouchableOpacity>
-    </TouchableOpacity>
+
+      {/* Close icon with separate handler */}
+      <TouchableOpacity onPress={onDelete} style={styles.closeButton}>
+        {deleteLoading ? (
+          <ActivityIndicator color={COLORS.white} />
+        ) : (
+          isDark ? <CloseDarkIcon /> : <CloseIcon />
+        )}
+      </TouchableOpacity>
+
+    </View>
   );
 };
 
@@ -71,4 +136,5 @@ const styles = StyleSheet.create({
     width: 36,
     borderRadius: 18,
   },
+
 });

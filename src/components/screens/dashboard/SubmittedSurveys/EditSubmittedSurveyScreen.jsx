@@ -15,89 +15,130 @@ import uuid from "react-native-uuid";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Topbar from "../../../common/Topbar";
 import { commonStyles } from "../../../../styles/commonStyles";
-import RadioQuestion from "./components/RadioQuestion";
-import CheckboxQuestion from "./components/CheckboxQuestion";
-import IntegerQuestion from "./components/IntegerQuestion";
-import TextQuestion from "./components/TextQuestion";
-import DateQuestion from "./components/DateQuestion";
-import TextareaQuestion from "./components/Textareaquestion";
-import PhotoQuestion from "./components/PhotoQuestion";
-import MultiplePhotoQuestion from "./components/MultiplePhotoQuestion";
+import RadioQuestion from "../TakeSurvey/components/RadioQuestion";
+import CheckboxQuestion from "../TakeSurvey/components/CheckboxQuestion";
+import IntegerQuestion from "../TakeSurvey/components/IntegerQuestion";
+import TextQuestion from "../TakeSurvey/components/TextQuestion";
+import DateQuestion from "../TakeSurvey/components/DateQuestion";
+import TextareaQuestion from "../TakeSurvey/components/Textareaquestion";
+import PhotoQuestion from "../TakeSurvey/components/PhotoQuestion";
+import MultiplePhotoQuestion from "../TakeSurvey/components/MultiplePhotoQuestion";
 import { ThemeContext } from "../../../../utils/ThemeContext";
-import GeoPointQuestion from "./components/GeoPointQuestion";
+import GeoPointQuestion from "../TakeSurvey/components/GeoPointQuestion";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
-import axios from "axios";
-import Note from "./components/Note";
+
+import Note from "../TakeSurvey/components/Note";
 import { useSQLiteContext } from "expo-sqlite";
 import * as db from "../../../../services/database";
-import FCompositionGroup from "./components/FCompositionGroup";
+import FCompositionGroup from "../TakeSurvey/components/FCompositionGroup";
+import axios from "../../../../utils/axios";
+import toFlatten from "../../../../utils/flatten";
 
-const TakeSurveyScreen = ({ route, navigation }) => {
+const EditSubmittedSurveyScreen = ({ route, navigation }) => {
   const { theme } = useContext(ThemeContext);
-  const { surveyId = null, draftId = null } = route?.params || {};
+   const { sessionId:surveyId } = route.params;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [surveyData, setSurveyData] = useState(null);
+  const [survey, setSurvey] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const sqlite = useSQLiteContext();
 
   // Initialize survey
-  useEffect(() => {
-    const initializeSurvey = async () => {
-      try {
-        if (!sqlite) {
-          throw new Error("SQLite context not available");
-        }
-
-        // Check if we're resuming a draft
-        const draftId = route.params?.draftId;
-        if (draftId) {
-          console.log("Resuming draft:", draftId);
-          // Set the session ID
-          setSessionId(draftId);
-          await AsyncStorage.setItem("current_session", draftId.toString());
-
-          // Use initial answers and index if provided
-          if (route.params?.initialAnswers) {
-            setAnswers(route.params.initialAnswers);
-          }
-          if (route.params?.initialIndex !== undefined) {
-            setCurrentIndex(route.params.initialIndex);
-          }
-        }
-        // Note: We don't create a new session here anymore
-        // It will be created when the user explicitly saves as draft
-
-        // Fetch survey data from API
-        try {
-          const response = await axios.get(apiURL, {
-            headers: {
-              Authorization: `Token ${apiToken}`,
-              Accept: "application/json",
-            },
-          });
-
-          const transformed = transformKoBoData(response.data);
-          console.log("First one transform ", transformed);
-          setSurveyData(transformed);
-        } catch (err) {
-          console.error("Error fetching survey:", err);
-          setError("Failed to load survey. Please try again.");
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error initializing survey:", error);
-        Alert.alert("Error", "Failed to initialize survey. Please try again.");
-        setLoading(false);
+ useEffect(() => {
+  const initializeSurvey = async () => {
+    try {
+      if (!sqlite) {
+        throw new Error("SQLite context not available");
       }
-    };
 
-    initializeSurvey();
-  }, [sqlite, route.params]);
+      setLoading(true);
+      
+      // Check if we're resuming a draft
+      const draftId = route.params?.draftId;
+      if (draftId) {
+        console.log("Resuming draft:", draftId);
+        setSessionId(draftId);
+        await AsyncStorage.setItem("current_session", draftId.toString());
+
+        if (route.params?.initialAnswers) {
+          setAnswers(route.params.initialAnswers);
+        }
+        if (route.params?.initialIndex !== undefined) {
+          setCurrentIndex(route.params.initialIndex);
+        }
+      }
+
+      // Fetch survey data from API
+      await fetchSurveyData();
+      
+    } catch (error) {
+      console.error("Error initializing survey:", error);
+      Alert.alert("Error", "Failed to initialize survey. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSurveyData = async () => {
+    try {
+      const { data: result } = await axios.get(`/data-management/get-form`);
+      const parsedResult = JSON.parse(result.raw_schema);
+      
+      const transformed = transformKoBoData(parsedResult);
+      const { survey: s } = parsedResult.asset.content;
+      
+      // Set both survey and surveyData together to prevent race conditions
+      setSurvey(s);
+      setSurveyData(transformed);
+      
+      // Only fetch answers if we have a session ID
+      if (surveyId) {
+        await fetchAnswers(s);
+      }
+    } catch (err) {
+      console.error("Error fetching survey:", err);
+      throw new Error("Failed to load survey questions");
+    }
+  };
+
+  const fetchAnswers = async (currentSurvey) => {
+    try {
+     
+
+      const { data: result } = await axios.get(
+        `/data-managements/submissions/edit/${surveyId}`
+      );
+      
+      const flattened = toFlatten(result);
+      console.log("API Response:", flattened);
+
+      const transformedAnswers = {};
+      console.log('sssss', survey);
+      Object.entries(flattened).forEach(([key, value]) => {
+        const question = currentSurvey.find((row) => row.name === key);
+        if (question) {
+          transformedAnswers[question.$kuid] = value;
+        }
+      });
+
+      setAnswers(prev => ({ ...prev, ...transformedAnswers }));
+      console.log("Merged answers:", transformedAnswers);
+    } catch (error) {
+      console.error('Error fetching answers:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to load answers',
+        text2: getErrorMessage(error)
+      });
+    }
+  };
+
+  initializeSurvey();
+}, [sqlite, route.params, surveyId]); // Added sessionId to dependencies
 
   // API configuration
   const apiURL = Constants.expoConfig.extra.API_URL;
@@ -521,6 +562,9 @@ const TakeSurveyScreen = ({ route, navigation }) => {
         [questionId]: value,
       }));
 
+
+
+
       // Save to SQLite
       await db.saveAnswer(sqlite, storedSessionId, questionId, value, type);
       // console.log("Answer saved successfully");
@@ -545,8 +589,9 @@ const TakeSurveyScreen = ({ route, navigation }) => {
     // Render the appropriate question component
   const renderQuestionComponent = () => {
     const currentQuestion = getCurrentQuestion();
+    
     if (!currentQuestion) return null;
-
+    console.log('666', currentQuestion)
     // Special handling for F_Composition and civil documentation inner groups
     if (
       currentQuestion.type === "group" &&
@@ -570,6 +615,8 @@ const TakeSurveyScreen = ({ route, navigation }) => {
     if (currentQuestion.type === "calculate") {
       return null;
     }
+
+    console.log('555', answers[currentQuestion.id])
 
     const commonProps = {
       question: processLabel(currentQuestion.question, answers),
@@ -985,4 +1032,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TakeSurveyScreen;
+export default EditSubmittedSurveyScreen;
