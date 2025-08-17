@@ -21,8 +21,8 @@ import IntegerQuestion from "../TakeSurvey/components/IntegerQuestion";
 import TextQuestion from "../TakeSurvey/components/TextQuestion";
 import DateQuestion from "../TakeSurvey/components/DateQuestion";
 import TextareaQuestion from "../TakeSurvey/components/Textareaquestion";
-import PhotoQuestion from "../TakeSurvey/components/PhotoQuestion";
-import MultiplePhotoQuestion from "../TakeSurvey/components/MultiplePhotoQuestion";
+import PhotoQuestion from "../TakeSurvey/components/edits/PhotoQuestion";
+import MultiplePhotoQuestion from "../TakeSurvey/components/edits/MultiplePhotoQuestion";
 import { ThemeContext } from "../../../../utils/ThemeContext";
 import GeoPointQuestion from "../TakeSurvey/components/GeoPointQuestion";
 import { useNavigation } from "@react-navigation/native";
@@ -45,6 +45,7 @@ const EditSubmittedSurveyScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
+  const [generalSubmission, setGeneralSubmission] = useState({});
   const sqlite = useSQLiteContext();
 
   // Initialize survey
@@ -112,12 +113,11 @@ const EditSubmittedSurveyScreen = ({ route, navigation }) => {
       const { data: result } = await axios.get(
         `/data-managements/submissions/edit/${surveyId}`
       );
-      
+      setGeneralSubmission(result);
       const flattened = toFlatten(result);
       console.log("API Response:", flattened);
 
       const transformedAnswers = {};
-      console.log('sssss', survey);
       Object.entries(flattened).forEach(([key, value]) => {
         const question = currentSurvey.find((row) => row.name === key);
         if (question) {
@@ -126,7 +126,7 @@ const EditSubmittedSurveyScreen = ({ route, navigation }) => {
       });
 
       setAnswers(prev => ({ ...prev, ...transformedAnswers }));
-      console.log("Merged answers:", transformedAnswers);
+      // console.log("Merged answers:", transformedAnswers);
     } catch (error) {
       console.error('Error fetching answers:', error);
       Toast.show({
@@ -530,24 +530,24 @@ const EditSubmittedSurveyScreen = ({ route, navigation }) => {
   // Handle answer changes and save to SQLite
   const handleAnswerChange = async (questionId, value, type) => {
     try {
-      if (!sqlite) {
-        throw new Error("SQLite context not available");
-      }
+      // if (!sqlite) {
+      //   throw new Error("SQLite context not available");
+      // }
 
-      // Get or create session ID
-      let storedSessionId = await AsyncStorage.getItem("current_session");
+      // // Get or create session ID
+      // let storedSessionId = await AsyncStorage.getItem("current_session");
 
-      // If no session exists, create one
-      if (!storedSessionId) {
-        console.log("Creating new session for answers...");
-        storedSessionId = await db.createSurveySession(sqlite);
-        console.log("New session created with ID:", storedSessionId);
-        await AsyncStorage.setItem(
-          "current_session",
-          storedSessionId.toString()
-        );
-        setSessionId(storedSessionId);
-      }
+      // // If no session exists, create one
+      // if (!storedSessionId) {
+      //   console.log("Creating new session for answers...");
+      //   storedSessionId = await db.createSurveySession(sqlite);
+      //   console.log("New session created with ID:", storedSessionId);
+      //   await AsyncStorage.setItem(
+      //     "current_session",
+      //     storedSessionId.toString()
+      //   );
+      //   setSessionId(storedSessionId);
+      // }
 
       // console.log("Saving answer:", {
       //   questionId,
@@ -566,7 +566,7 @@ const EditSubmittedSurveyScreen = ({ route, navigation }) => {
 
 
       // Save to SQLite
-      await db.saveAnswer(sqlite, storedSessionId, questionId, value, type);
+      // await db.saveAnswer(sqlite, storedSessionId, questionId, value, type);
       // console.log("Answer saved successfully");
 
       // Save draft if needed
@@ -616,11 +616,15 @@ const EditSubmittedSurveyScreen = ({ route, navigation }) => {
       return null;
     }
 
-    console.log('555', answers[currentQuestion.id])
+    console.log('555', processLabel(currentQuestion.question, answers))
 
     const commonProps = {
       question: processLabel(currentQuestion.question, answers),
       value: answers[currentQuestion.id],
+      name: currentQuestion.name,
+      currentQuestion,
+      generalSubmission,
+      setGeneralSubmission,
       onChange: (value) =>
         handleAnswerChange(currentQuestion.id, value, currentQuestion.type),
       required: currentQuestion.required,

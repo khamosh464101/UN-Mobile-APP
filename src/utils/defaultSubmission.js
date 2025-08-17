@@ -87,7 +87,7 @@ const defaultSubmission = {
   type_return_document: null,
   type_return_document_number: null,
   type_return_document_date: null,
-  type_return_document_photos: [],
+  type_return_document_photo: [],
   household_get_support_no: null,
   household_get_support: null,
   household_get_support_yes: null,
@@ -130,7 +130,7 @@ const defaultSubmission = {
   house_owner_myself: null,
   house_document_number: null,
   house_document_date: null,
-  house_document_photos: [],
+  house_document_photo: [],
   duration_lived_thishouse: null,
 
   materials_house_constructed: null,

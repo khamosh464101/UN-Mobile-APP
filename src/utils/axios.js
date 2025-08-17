@@ -4,7 +4,7 @@ import Axios from 'axios';
 import Constants from "expo-constants";
 
 const axios = Axios.create({
-  baseURL: 'http://192.168.1.253:8000',
+  baseURL: 'https://demo.momtaz.ws',
   withCredentials: true, // include cookies if needed
 });
 
@@ -14,7 +14,7 @@ const axios = Axios.create({
 axios.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("token")
-    console.log('12345', 'http://192.168.1.253:8000');
+    console.log('12345', 'https://demo.momtaz.ws');
     config.headers.Accept = 'application/json';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

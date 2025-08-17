@@ -355,8 +355,11 @@ function toFlatten(apiData) {
     result.house_problems_area_photos = apiData.house_condition.house_problem_area_photo;
   }
 
-  if (apiData.type_return_document_photos) {
-    result.type_return_document_photos = apiData.type_return_document_photos;
+  if (apiData.returnee.type_return_document_photo) {
+    result.type_return_document_photo = apiData.returnee.type_return_document_photo.map((row) => {return row['type_return_document_photo']});
+  }
+  if (apiData.house_land_ownership.land_ownership_document) {
+    result.house_document_photo = apiData.house_land_ownership.land_ownership_document.map((row) => {return row['house_document_photo']});
   }
 
   if (apiData.infrasttructure_service) {

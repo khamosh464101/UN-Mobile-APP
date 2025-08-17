@@ -11,10 +11,10 @@ import { ThemeContext } from "../../../../../utils/ThemeContext";
 const CheckboxQuestion = ({ question, options, value = [], onChange }) => {
   const { theme } = useContext(ThemeContext);
   const toggleOption = (option) => {
-    if (value.includes(option)) {
-      onChange(value.filter((item) => item !== option));
+    if (value.includes(option.value)) {
+      onChange(value.filter((item) => item !== option.value));
     } else {
-      onChange([...value, option]);
+      onChange([...value, option.value]);
     }
   };
   console.log("Options:", options);
@@ -33,7 +33,7 @@ const CheckboxQuestion = ({ question, options, value = [], onChange }) => {
           <View
             style={[styles.checkbox, { borderColor: theme.colors.primary }]}
           >
-            {value.includes(option) && (
+            {value.includes(option.value) && (
               <View
                 style={[
                   styles.checked,

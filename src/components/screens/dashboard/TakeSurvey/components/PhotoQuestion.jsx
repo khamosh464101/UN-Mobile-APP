@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   View,
   Text,
@@ -15,90 +15,74 @@ import { ThemeContext } from "../../../../../utils/ThemeContext";
 
 const PhotoQuestion = ({
   question,
-  value, // Can be string (URL) or { uri: string }
+  value,
   onChange,
   required = false,
   hint = "",
 }) => {
   const { theme } = useContext(ThemeContext);
   const cameraRef = useRef(null);
+
   const [facing, setFacing] = useState("back");
   const [permission, requestPermission] = useCameraPermissions();
 
-  // Normalize value to always be { uri: string } format
-  const normalizedValue = useMemo(() => {
-    if (!value) return null;
-    return typeof value === 'string' ? { uri: value } : value;
-  }, [value]);
-
   const takePicture = async () => {
     if (!cameraRef.current) return;
-    
+    const options = { quality: 1, base64: true, exif: false };
+    const newPhoto = await cameraRef.current.takePictureAsync(options);
     try {
-      const options = { quality: 0.8, base64: false, exif: false };
-      const newPhoto = await cameraRef.current.takePictureAsync(options);
-      
-      // Create unique filename
+      // Create a unique filename with timestamp
       const fileName = `photo_${Date.now()}.jpg`;
       const targetPath = `${FileSystem.documentDirectory}survey_images/${fileName}`;
 
       // Ensure directory exists
       await FileSystem.makeDirectoryAsync(
         `${FileSystem.documentDirectory}survey_images/`,
-        { intermediates: true }
+        {
+          intermediates: true,
+        }
       );
 
-      // Move the image to permanent storage
-      await FileSystem.moveAsync({
+      // Copy the image to permanent location
+      await FileSystem.copyAsync({
         from: newPhoto.uri,
         to: targetPath,
       });
 
-      // Return just the path string to parent (or { uri: path } if needed)
-      onChange(targetPath);
-      
+      // Save only the new uri (permanent location)
+      onChange({ uri: targetPath });
     } catch (error) {
-      console.error("Error saving photo:", error);
-      Toast.show({
-        type: 'error',
-        text1: 'Photo Error',
-        text2: 'Could not save photo'
-      });
+      console.error("Error saving image to permanent location", error);
     }
   };
 
   const removePhoto = async () => {
-    if (!normalizedValue?.uri) return;
-    
-    try {
-      // Only delete if it's a local file (not a network URL)
-      if (normalizedValue.uri.startsWith('file://') || 
-          normalizedValue.uri.startsWith(FileSystem.documentDirectory)) {
-        await FileSystem.deleteAsync(normalizedValue.uri, { idempotent: true });
+    if (value?.uri) {
+      try {
+        await FileSystem.deleteAsync(value.uri, { idempotent: true });
+      } catch (e) {
+        console.warn("Failed to delete photo:", e);
       }
-      onChange(null);
-    } catch (e) {
-      console.warn("Failed to delete photo:", e);
     }
+    onChange(null);
   };
-
-  function toggleCameraFacing() {
-    setFacing((current) => (current === "back" ? "front" : "back"));
-  }
 
   if (!permission) {
     return <View />;
   }
-
   if (!permission.granted) {
     return (
       <View style={styles.container}>
         <Text style={[styles.message, { color: theme.colors.text }]}>
           We need your permission to show the camera
         </Text>
-        <Button onPress={requestPermission} title="Grant Permission" />
+        <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
+  }
+
+  function toggleCameraFacing() {
+    setFacing((current) => (current === "back" ? "front" : "back"));
   }
 
   return (
@@ -108,44 +92,37 @@ const PhotoQuestion = ({
           {question}
           {required && <Text style={{ color: theme.colors.error }}> *</Text>}
         </Text>
-        {hint && (
-          <Text style={[styles.hintText, { color: theme.colors.secondaryText }]}>
+        {hint ? (
+          <Text
+            style={[styles.hintText, { color: theme.colors.secondaryText }]}
+          >
             {hint}
           </Text>
-        )}
+        ) : null}
       </View>
-
       <View style={styles.cameraContainer}>
-        {normalizedValue?.uri ? (
+        {value?.uri ? (
           <>
-            <Image 
-              style={styles.preview} 
-              source={{ uri: normalizedValue.uri }} 
-              resizeMode="contain"
-            />
+            <Image style={styles.preview} source={{ uri: value.uri }} />
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.button} onPress={removePhoto}>
-                <CameraIcon width={24} height={24} fill={theme.colors.error} />
+                <CameraIcon />
               </TouchableOpacity>
             </View>
           </>
         ) : (
           <>
-            <CameraView 
-              style={styles.camera} 
-              facing={facing} 
-              ref={cameraRef}
-              enableTorch={false}
-            />
+            <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
+
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.button}
                 onPress={toggleCameraFacing}
               >
-                <CameraFlipIcon width={24} height={24} fill={theme.colors.primary} />
+                <CameraFlipIcon />
               </TouchableOpacity>
               <TouchableOpacity style={styles.button} onPress={takePicture}>
-                <CameraIcon width={24} height={24} fill={theme.colors.primary} />
+                <CameraIcon />
               </TouchableOpacity>
             </View>
           </>
@@ -156,11 +133,7 @@ const PhotoQuestion = ({
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    marginBottom: 20, 
-    flex: 1,
-    minHeight: 400, // Ensure consistent height
-  },
+  container: { marginBottom: 20, flex: 1 },
   questionHeader: {
     marginBottom: 10,
   },
@@ -177,41 +150,41 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: '#000', // Black background for camera
-    position: 'relative',
   },
-  camera: { 
+  camera: { flex: 1 },
+  cameraButtonContainer: {
     flex: 1,
-    aspectRatio: 3/4, // Standard photo aspect ratio
+    backgroundColor: "transparent",
+    justifyContent: "flex-end",
+    marginBottom: 20,
+    position: "absolute",
   },
-  preview: { 
-    width: "100%", 
-    flex: 1,
-    aspectRatio: 3/4,
-  },
+  preview: { width: "100%", flex: 1 },
+  // message: {
+  //   textAlign: "center",
+  //   paddingBottom: 10,
+  // },
+
   buttonContainer: {
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-around",
+    backgroundColor: "transparent",
     position: "absolute",
     bottom: 25,
   },
   button: {
     height: 60,
     width: 60,
-    borderRadius: 30,
-    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 40,
+    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  message: {
-    textAlign: "center",
-    padding: 20,
+  text: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "red",
   },
 });
 
